@@ -1,0 +1,22 @@
+Version 1.2 (Version Code=3)
+====================
+- Fixed reported GYROSCOPE units as rad/sec and not degrees.
+- Changed PRESSURE sensor units to hPa (hectopascal) instead of KP.
+- Added new Sensor.TYPE_AMBIENT_TEMPERATURE and Sensor.TYPE_RELATIVE_HUMIDITY
+- Updated 'Uses SDK' to target SDK Revision 15 per suggestions in post 
+    http://android-developers.blogspot.com/2012/01/say-goodbye-to-menu-button.html
+- Keep sensor display from rotating when displaying sensor data per user 
+    feedback request. Sensor menu still allows screen rotation however.
+
+Version 1.1 (Version Code=2)
+====================
+Bug Fix Update!
+
+Apparently when Froyo came out, Android added 3 more sensors and many devices
+have them. Normally a good thing, but due to a bug in my app when it discovered
+those sensors it indexed beyond an array! Bummer, poor programming on my part.
+But now it is fixed and hopefully will adapt if more sensors are added.
+
+Version 1.0 (Version Code=1)
+====================
+Original release

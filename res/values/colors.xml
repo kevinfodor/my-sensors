@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<color name="sensor_name">#AA00FF00</color>
+	<color name="sensor_vendor">#AAFFFFFF</color>
+	<color name="green">#FF00FF00</color>
+	<color name="yellow">#ffffff00</color>
+	<color name="sensor_attributes">#ffffff00</color>
+	<color name="white">#FFFFFFFF</color>
+</resources>
