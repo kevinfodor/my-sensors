@@ -17,9 +17,9 @@ public class SensorAdapter extends ArrayAdapter<Sensor> {
 	private Context cntx;
 
 	public SensorAdapter(Context context, int textViewResourceId,
-			ArrayList<Sensor> items) {		
+			ArrayList<Sensor> items) {
 		super(context, textViewResourceId, items);
-		
+
 		// Retain information about the context and items in this array
 		this.cntx = context;
 		this.items = items;
@@ -27,7 +27,7 @@ public class SensorAdapter extends ArrayAdapter<Sensor> {
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		
+
 		View v = convertView;
 		if (v == null) {
 			// Obtain a handle to the view

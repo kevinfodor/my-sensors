@@ -1,3 +1,24 @@
+Version 1.3 (Version Code=4)
+====================
+- Supports Android SDK v4 thru v19
+- Removed deprecated sensor type constants and replaced with explicit values.
+    This was done to help maintain backwards compatibility with as many
+    Android API versions as possible.
+- Removed use of managed dialogs from Activities as this has been deprecated
+    by the API. Moved existing code to use FragmentActivity and DialogFragment 
+    as recommended by Android. Please see: 
+    http://android-developers.blogspot.com/2011/03/fragments-for-all.html
+    for more details on the new API and how to incorporate a Android provided
+    static library for backwards compatibility into APIv4.
+    This does mean you now need to include a static library for this API
+    as described in: http://developer.android.com/guide/topics/ui/dialogs.html
+- To support FragmentActivity and DialogFragments, I took the opportunity
+    to separate the 'about' and 'sensor rate change' dialog classes to
+    their own separate modules. This doesn't change the operation of the app
+    any, it just makes the code a bit more maintainable and readable.
+- In general fixed as many Android Lint issues as possible. Most were pretty
+    minor and did not affect the code function.
+
 Version 1.2 (Version Code=3)
 ====================
 - Fixed reported GYROSCOPE units as rad/sec and not degrees.

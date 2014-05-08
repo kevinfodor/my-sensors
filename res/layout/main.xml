@@ -4,7 +4,7 @@
 	android:layout_height="fill_parent">
 	<ImageView android:layout_width="fill_parent" android:id="@+id/title"
 		android:layout_height="wrap_content" android:src="@drawable/my_sensors_title"
-		android:paddingTop="6dip" android:paddingRight="6dip" />
+		android:paddingTop="6dip" android:paddingRight="6dip" android:contentDescription="@string/empty"/>
 	<ListView android:id="@+id/sensors" android:layout_width="fill_parent"
 		android:layout_height="wrap_content" />
 </LinearLayout>

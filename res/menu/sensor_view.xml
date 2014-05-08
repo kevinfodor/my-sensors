@@ -3,17 +3,19 @@
 
     <item
         android:id="@+id/web_search"
+        android:alphabeticShortcut="s"
         android:icon="@android:drawable/ic_menu_search"
-        android:title="Search Web..."
+        android:numericShortcut="1"
+        android:title="@string/search_web_tag"
         android:titleCondensed="Search">
- android:showAsAction="ifRoom|withText"
     </item>
     <item
         android:id="@+id/about"
+        android:alphabeticShortcut="b"
         android:icon="@android:drawable/ic_menu_info_details"
-        android:title="About..."
-        android:titleCondensed="About...">
- android:showAsAction="ifRoom|withText"
+        android:numericShortcut="0"
+        android:title="@string/about_tag"
+        android:titleCondensed="@string/about_tag">
     </item>
 
 </menu>

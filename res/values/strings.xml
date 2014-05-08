@@ -4,7 +4,7 @@
     <string name="empty">No sensors!</string>
     <string name="app_name">My Sensors</string>
     <string name="app_author">Kevin Fodor</string>
-    <string name="app_version">v1.2</string>
+    <string name="app_version">v1.X</string>
     <string name="app_about_text">This application is a very simple utility
     which allows you to explore each sensor available on an Android device.
     This is mainly intended to be an instructional and experimental application
@@ -31,5 +31,16 @@
     <string name="sensor_data_format">"d[%1$d] = "</string>
 
     <string name="sensor_log">"Sensor: %1$s %2$s %3$s Version:%4$d\n"</string>
+    <string name="about_tag">&quot;About&#8230;&quot;</string>
+    <string name="value_array_tag">d[x] = </string>
+    <string name="label_tag">Label = </string>
+    <string name="zero_dot_zero">0.0</string>
+    <string name="zero_tag">0</string>
+    <string name="milliamp_tag">mA</string>
+    <string name="units_tag">units</string>
+    <string name="change_event_update_rate_tag">Change Event Update Rate</string>
+    <string name="search_web_tag">&quot;Search Web&#8230;&quot;</string>
+    <string name="sensor_details_tag">Sensor Details</string>
+    <string name="real_time_data_tag">Real-Time Data</string>
 
 </resources>

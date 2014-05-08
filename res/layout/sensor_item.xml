@@ -7,9 +7,9 @@
 
 		android:layout_width="wrap_content" android:layout_height="fill_parent"
 
-		android:layout_alignParentTop="true" android:layout_alignParentBottom="true"/>
+		android:layout_alignParentTop="true" android:layout_alignParentBottom="true" android:contentDescription="@string/empty"/>
 
-	<TextView android:id="@+id/sensor_vendor" android:text="Vendor"
+	<TextView android:id="@+id/sensor_vendor" android:text="@string/sensor_vendor_tag"
 
 		android:layout_width="fill_parent" android:layout_height="wrap_content"
 
@@ -18,7 +18,7 @@
 		android:layout_alignParentRight="true" android:singleLine="true"
 		android:ellipsize="marquee" android:textColor="@color/sensor_vendor" />
 
-	<TextView android:id="@+id/sensor_name" android:text="Name"
+	<TextView android:id="@+id/sensor_name" android:text="@string/sensor_name_tag"
 
 		android:layout_width="fill_parent" android:layout_height="wrap_content"
 

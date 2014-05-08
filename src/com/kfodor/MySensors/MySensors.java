@@ -2,32 +2,25 @@ package com.kfodor.MySensors;
 
 import java.util.ArrayList;
 
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.DialogInterface.OnCancelListener;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentActivity;
 
-public class MySensors extends Activity {
+public class MySensors extends FragmentActivity {
 
 	private static final String TAG = "MySensors";
-
-	// Constants
-	private final int DIALOG_ABOUT_ID = 0;
 
 	// Sensor Manager
 	private SensorManager mgr;
@@ -132,17 +125,13 @@ public class MySensors extends Activity {
 	// Callback for creating dialogs that are managed (saved and restored)
 	// for you by the activity. This is only called once, the first time
 	// the options menu is displayed.
-	protected Dialog onCreateDialog(int id) {
-		super.onCreateDialog(id);
+	protected Dialog onCreateDialog(int id, Bundle savedInstanceState) {
 
 		Dialog dialog;
 
 		// Find which dialog has been selected
 		switch (id) {
-		case DIALOG_ABOUT_ID:
-			// Create the about dialog
-			dialog = about(this, id);
-			break;
+		// Add dialogs via id here...
 		default:
 			dialog = null;
 		}
@@ -151,13 +140,16 @@ public class MySensors extends Activity {
 
 	// Provides opportunity to prepare your dialog before it is shown
 	@Override
-	protected void onPrepareDialog(int id, Dialog dialog) {
-		super.onPrepareDialog(id, dialog);
+	protected void onPrepareDialog(int id, Dialog dialog,
+			Bundle savedInstanceState) {
+
 		switch (id) {
-		case DIALOG_ABOUT_ID:
-			break;
+		// Prepare dialogs by id here...
 		default:
 		}
+
+		// Show the dialog
+		dialog.show();
 
 		return;
 	}
@@ -189,7 +181,11 @@ public class MySensors extends Activity {
 		// About...
 		case (R.id.about):
 			// ... Perform menu handler actions ...
-			showDialog(DIALOG_ABOUT_ID);
+
+			// Create an instance of the dialog fragment and show it.
+			DialogFragment about = new AboutDlg();
+			about.show(getSupportFragmentManager(), "about");
+
 			return true; // Handled menu item
 		}
 
@@ -198,7 +194,7 @@ public class MySensors extends Activity {
 	}
 
 	private void loadSensors() {
-		
+
 		// Get references to UI widget (ListView) for sensors
 		ListView sensorListView = (ListView) findViewById(R.id.sensors);
 
@@ -214,19 +210,19 @@ public class MySensors extends Activity {
 
 		// Load array with each sensor available
 		for (Sensor sensor : mgr.getSensorList(Sensor.TYPE_ALL)) {
-			
+
 			// Add this sensor to our list of sensors
 			sensorArray.add(sensor);
-			
+
 			// Write some info to the log about this sensor
-			String text = String.format(getString(R.string.sensor_log), 
-				SensorInterface.getType(sensor.getType()), 
-				sensor.getName(), sensor.getVendor(), 
-				sensor.getVersion()) + "\n";
+			String text = String.format(getString(R.string.sensor_log),
+					SensorInterface.getType(sensor.getType()),
+					sensor.getName(), sensor.getVendor(), sensor.getVersion())
+					+ "\n";
 			Log.d(TAG, text);
 		}
 
-		// Notifies the attached View that the underlying data has been 
+		// Notifies the attached View that the underlying data has been
 		// changed and it should refresh itself.
 		sa.notifyDataSetChanged();
 
@@ -244,36 +240,5 @@ public class MySensors extends Activity {
 		});
 
 		return;
-	}
-
-	// Build the 'about' dialog
-	public static Dialog about(final Activity a, final int id) {
-		Dialog dialog;
-
-		// Inflate the about layout and obtain a reference to the view.
-		LayoutInflater inflater = (LayoutInflater) a
-				.getSystemService(LAYOUT_INFLATER_SERVICE);
-		View layout = inflater.inflate(R.layout.about_dialog, (ViewGroup) a
-				.findViewById(R.id.layout_root));
-
-		// Build this alert dialog box
-		AlertDialog.Builder builder = new AlertDialog.Builder(a);
-		builder.setView(layout);
-
-		// Add 'ok' button
-		builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int id) {
-				a.removeDialog(id);
-			}
-		});
-		builder.setCancelable(true);
-		builder.setOnCancelListener(new OnCancelListener() {
-			public void onCancel(DialogInterface dialog) {
-				a.removeDialog(id);
-			}
-		});
-
-		dialog = builder.create();
-		return dialog;
 	}
 }

@@ -6,9 +6,8 @@
         android:alphabeticShortcut="b"
         android:icon="@android:drawable/ic_menu_info_details"
         android:numericShortcut="0"
-        android:title="About..."
-        android:titleCondensed="About...">
-        android:showAsAction="ifRoom|withText"
+        android:title="@string/about_tag"
+        android:titleCondensed="@string/about_tag">
     </item>
 
 </menu>
