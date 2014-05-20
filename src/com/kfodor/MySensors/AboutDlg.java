@@ -33,7 +33,7 @@ public class AboutDlg extends DialogFragment implements OnClickListener,
 		builder.setView(layout);
 
 		// Add 'ok' button
-		builder.setPositiveButton("Ok", this);
+		builder.setPositiveButton(getString(android.R.string.ok), this);
 
 		// Sets the callback that will be called if the dialog is canceled.
 		builder.setOnCancelListener(this);

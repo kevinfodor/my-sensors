@@ -1,8 +1,6 @@
 package com.kfodor.MySensors;
 
 import java.util.ArrayList;
-import java.util.List;
-
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -19,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -26,12 +25,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
+import com.kfodor.MySensors.MySensors;
 
 public class SensorView extends FragmentActivity implements
 		SensorEventListener, SensorRateChangeDlg.SensorRateChangeListener {
 
 	private static final String TAG = "SensorView";
 
+	private SensorListEntry se; // The sensor list entry
 	private SensorInterface si; // The sensor interface to this sensor
 	private SensorManager mgr; // Sensor Manager
 
@@ -41,13 +42,13 @@ public class SensorView extends FragmentActivity implements
 	TextView timestamp_view;
 	TextView accuracy_view;
 	ArrayList<TextView> data_value_views;
+
 	/*
 	 * there may be one or more data values for each sensor, so here we declare
 	 * an array list of text views to hold each data value and its label.
 	 */
 
 	private int event_counter = 0;
-	private int rate = -1;
 
 	/** Called when the activity is first created. */
 	// Called at the start of the full lifetime.
@@ -84,12 +85,15 @@ public class SensorView extends FragmentActivity implements
 			}
 		});
 
+		// Fix issue #1 which will keep the screen from timing out
+		// or going off while viewing sensor data.
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
 		// Write some info to the log about this sensor
 		String text = String.format(getString(R.string.sensor_log),
 				SensorInterface.getType(si.sensor().getType()), si.sensor()
 						.getName(), si.sensor().getVendor(), si.sensor()
-						.getVersion())
-				+ "\n";
+						.getVersion());
 		Log.d(TAG, text);
 	}
 
@@ -128,8 +132,8 @@ public class SensorView extends FragmentActivity implements
 		// by the activity but suspended when it was inactive.
 		Log.d(TAG, "onResume\n");
 
-		// Register sensor listener at normal rate until changed
-		registerSensorListener(SensorManager.SENSOR_DELAY_NORMAL, false);
+		// Register sensor listener at previously set rate until changed
+		registerSensorListener(se.getRate(), false);
 	}
 
 	// Called to save UI state changes at the
@@ -269,7 +273,14 @@ public class SensorView extends FragmentActivity implements
 	}
 
 	public void onAccuracyChanged(Sensor sensor, int accuracy) {
-		// TODO Auto-generated method stub
+		// Not sure what exactly to do when the sensor
+		// accuracy has changed, but perhaps some applications
+		// need to use this as a way to impact how they use the sensors.
+		// in any case we just log the event.
+		String text = String.format(
+				getString(R.string.sensor_accuracy_changed), sensor.getName(),
+				accuracy);
+		Log.d(TAG, text);
 	}
 
 	/*
@@ -295,7 +306,7 @@ public class SensorView extends FragmentActivity implements
 				event_count_view.setText(((Integer) event_counter).toString());
 
 				// Convert time stamp to seconds and update timestamp view
-				Float ts = (float) event.timestamp / 1000000000;
+				Float ts = (float) event.timestamp / 1000000000.0f;
 				timestamp_view.setText(ts.toString());
 
 				// Update accuracy text view
@@ -334,15 +345,12 @@ public class SensorView extends FragmentActivity implements
 		// Acquire Sensor Manager
 		mgr = (SensorManager) getSystemService(SENSOR_SERVICE);
 
-		// Get the list of all sensors from the sensor manager
-		List<Sensor> sensorList = mgr.getSensorList(Sensor.TYPE_ALL);
-
 		// Extract the sensor at the given position in the list
-		Sensor s = sensorList.get(position);
+		se = MySensors.getSensorArray().get(position);
 
 		// Now that we have the sensor, create a sensor interface object
 		// and assign it to the interface.
-		si = new SensorInterface(s);
+		si = new SensorInterface(se.getSensor());
 
 		return;
 	}
@@ -458,7 +466,7 @@ public class SensorView extends FragmentActivity implements
 			tv = (TextView) v.findViewById(R.id.data_value);
 			if (tv != null) {
 				// Set initial value
-				tv.setText("No data!");
+				tv.setText(R.string.no_data_tag);
 				// Add this view to the array of text views for data values
 				data_value_views.add(tv);
 			}
@@ -472,23 +480,24 @@ public class SensorView extends FragmentActivity implements
 	// Helper function to register and unregister a sensor listener
 	private void registerSensorListener(int r, boolean notify) {
 
-		// Check if we are changing the rate
-		if (r != rate) {
+		// Check if we are changing the rate, or this is being
+		// done for the first time (with no notification)
+		if ((r != se.getRate()) || (notify == false)) {
 			// Unregister anything which was previously registered
 			mgr.unregisterListener(SensorView.this);
 
-			// Register as a listener at set rate
+			// Register as a listener at the new set rate
 			boolean result = mgr.registerListener(this, si.sensor(), r);
 			if (result == true) {
+				se.setRate(r);
 				delay_view.setText(SensorInterface.delayToString(r));
 				if (notify == true) {
 					Toast.makeText(
 							getApplicationContext(),
-							"Changed event rate to "
+							getString(R.string.sensor_rate_changed_tag)
 									+ SensorInterface.delayToString(r),
 							Toast.LENGTH_SHORT).show();
 				}
-				rate = r;
 			}
 		}
 
@@ -499,7 +508,7 @@ public class SensorView extends FragmentActivity implements
 	// defined by the SensorRateChangeDlg.SensorRateChangeListener interface
 	@Override
 	public int getRate() {
-		return rate;
+		return se.getRate();
 	}
 
 	// The dialog fragment receives a reference to this Activity through the

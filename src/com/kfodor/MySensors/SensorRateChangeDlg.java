@@ -37,7 +37,7 @@ public class SensorRateChangeDlg extends DialogFragment implements
 		// Instantiate an AlertDialog.Builder with its constructor
 		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
-		builder.setTitle("Choose an event rate:");
+		builder.setTitle(getString(R.string.rate_change_choice_tag));
 
 		int delay = mListener.getRate();
 		builder.setSingleChoiceItems(SensorInterface.delay, delay,
@@ -46,14 +46,15 @@ public class SensorRateChangeDlg extends DialogFragment implements
 						delay_picked = item;
 					}
 				});
-		builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int id) {
-				mListener.onRateChange(delay_picked);
-			}
-		});
+		builder.setPositiveButton(getString(android.R.string.ok),
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						mListener.onRateChange(delay_picked);
+					}
+				});
 
 		// Sets the callback that will be called if the dialog is canceled.
-		builder.setNegativeButton("Cancel", this);
+		builder.setNegativeButton(getString(android.R.string.cancel), this);
 		builder.setCancelable(true);
 		builder.setOnCancelListener(this);
 

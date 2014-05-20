@@ -11,13 +11,13 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class SensorAdapter extends ArrayAdapter<Sensor> {
+public class SensorAdapter extends ArrayAdapter<SensorListEntry> {
 
-	private ArrayList<Sensor> items;
+	private ArrayList<SensorListEntry> items;
 	private Context cntx;
 
 	public SensorAdapter(Context context, int textViewResourceId,
-			ArrayList<Sensor> items) {
+			ArrayList<SensorListEntry> items) {
 		super(context, textViewResourceId, items);
 
 		// Retain information about the context and items in this array
@@ -37,7 +37,7 @@ public class SensorAdapter extends ArrayAdapter<Sensor> {
 		}
 
 		// Determine what sensor we are trying to show
-		Sensor sensor = items.get(position);
+		Sensor sensor = items.get(position).getSensor();
 		if (sensor != null) {
 
 			// Populate sensor's icon

@@ -2,10 +2,18 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
+        android:id="@+id/reset"
+        android:alphabeticShortcut="r"
+        android:icon="@android:drawable/ic_menu_info_details"
+        android:numericShortcut="0"
+        android:title="@string/reset_tag"
+        android:titleCondensed="@string/reset_tag">
+    </item>
+    <item
         android:id="@+id/about"
         android:alphabeticShortcut="b"
         android:icon="@android:drawable/ic_menu_info_details"
-        android:numericShortcut="0"
+        android:numericShortcut="1"
         android:title="@string/about_tag"
         android:titleCondensed="@string/about_tag">
     </item>

@@ -14,6 +14,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
@@ -24,6 +25,9 @@ public class MySensors extends FragmentActivity {
 
 	// Sensor Manager
 	private SensorManager mgr;
+
+	// Create an array list of sensors
+	private final static ArrayList<SensorListEntry> sensorArray = new ArrayList<SensorListEntry>();
 
 	/** Called when the activity is first created. */
 	// Called at the start of the full lifetime.
@@ -178,7 +182,27 @@ public class MySensors extends FragmentActivity {
 		// Check for each known menu item
 		switch (id) {
 
-		// About...
+		// Reset rates...
+		case (R.id.reset):
+			// For each sensor, reset update rates to default
+			for (SensorListEntry se : sensorArray) {
+
+				// Change the update rate to default
+				se.setRate(SensorListEntry.default_rate);
+			}
+
+			// Construct notification next
+			String text = String
+					.format(getString(R.string.reset_all_rates_notification_tag),
+							SensorInterface
+									.delayToString(SensorListEntry.default_rate));
+			// Show notification
+			Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT)
+					.show();
+
+			return true; // Handled menu item
+
+			// About...
 		case (R.id.about):
 			// ... Perform menu handler actions ...
 
@@ -198,9 +222,6 @@ public class MySensors extends FragmentActivity {
 		// Get references to UI widget (ListView) for sensors
 		ListView sensorListView = (ListView) findViewById(R.id.sensors);
 
-		// Create an array list of sensors
-		final ArrayList<Sensor> sensorArray = new ArrayList<Sensor>();
-
 		// Create a Sensor adapter to bind the array to the list view
 		final SensorAdapter sa;
 		sa = new SensorAdapter(this, R.layout.sensor_item, sensorArray);
@@ -211,14 +232,15 @@ public class MySensors extends FragmentActivity {
 		// Load array with each sensor available
 		for (Sensor sensor : mgr.getSensorList(Sensor.TYPE_ALL)) {
 
+			SensorListEntry sensorItem = new SensorListEntry(sensor);
+
 			// Add this sensor to our list of sensors
-			sensorArray.add(sensor);
+			sensorArray.add(sensorItem);
 
 			// Write some info to the log about this sensor
 			String text = String.format(getString(R.string.sensor_log),
 					SensorInterface.getType(sensor.getType()),
-					sensor.getName(), sensor.getVendor(), sensor.getVersion())
-					+ "\n";
+					sensor.getName(), sensor.getVendor(), sensor.getVersion());
 			Log.d(TAG, text);
 		}
 
@@ -240,5 +262,12 @@ public class MySensors extends FragmentActivity {
 		});
 
 		return;
+	}
+
+	/**
+	 * @return the sensorArray
+	 */
+	public static ArrayList<SensorListEntry> getSensorArray() {
+		return sensorArray;
 	}
 }

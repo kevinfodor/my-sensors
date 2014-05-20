@@ -1,13 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="wrap_content" android:layout_height="wrap_content"
-	android:layout_marginTop="6dip" android:orientation="horizontal">
-	<TextView android:id="@+id/data_array" android:layout_height="wrap_content"
-		android:layout_width="wrap_content" android:text="@string/value_array_tag"
-		android:textColor="@color/sensor_attributes" android:textSize="14sp"></TextView>
-	<TextView android:id="@+id/data_label" android:layout_height="wrap_content"
-		android:layout_width="wrap_content" android:textColor="@color/sensor_attributes"
-		android:text="@string/label_tag" android:textSize="14sp"></TextView>
-	<TextView android:id="@+id/data_value" android:layout_height="wrap_content"
-		android:text="@string/zero_dot_zero" android:textStyle="bold" android:textColor="@color/white" android:textSize="18sp" android:layout_width="fill_parent"></TextView>
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="6dip"
+    android:orientation="horizontal" >
+
+    <TextView
+        android:id="@+id/data_array"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/value_array_tag"
+        android:textColor="@color/sensor_attributes"
+        android:textSize="14sp" >
+    </TextView>
+
+    <TextView
+        android:id="@+id/data_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/label_tag"
+        android:textColor="@color/sensor_attributes"
+        android:textSize="14sp" >
+    </TextView>
+
+    <TextView
+        android:id="@+id/data_value"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/zero_dot_zero"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        android:textStyle="bold" >
+    </TextView>
+
 </LinearLayout>
