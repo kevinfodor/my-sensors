@@ -4,7 +4,7 @@
     <string name="empty">No sensors!</string>
     <string name="app_name">My Sensors</string>
     <string name="app_author">Kevin Fodor</string>
-    <string name="app_version">v1.X</string>
+    <string name="app_version">v1.3_alpha</string>
     <string name="app_about_text">This application is a very simple utility
     which allows you to explore each sensor available on an Android device.
     This is mainly intended to be an instructional and experimental application
@@ -44,5 +44,6 @@
     <string name="rate_change_choice_tag">Choose an event update rate:</string>
     <string name="no_data_tag">No data!</string>
     <string name="sensor_rate_changed_tag">Changed event rate to </string>
+    <string name="sensors_found_tag">Sensors Found</string>
     
 </resources>

@@ -1,7 +1,6 @@
 package com.kfodor.MySensors;
 
 import java.util.ArrayList;
-
 import android.app.Dialog;
 import android.content.Intent;
 import android.hardware.Sensor;
@@ -14,6 +13,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 import android.support.v4.app.DialogFragment;
@@ -27,7 +27,7 @@ public class MySensors extends FragmentActivity {
 	private SensorManager mgr;
 
 	// Create an array list of sensors
-	private final static ArrayList<SensorListEntry> sensorArray = new ArrayList<SensorListEntry>();
+	private static final ArrayList<SensorListEntry> sensorArray = new ArrayList<SensorListEntry>();
 
 	/** Called when the activity is first created. */
 	// Called at the start of the full lifetime.
@@ -46,7 +46,6 @@ public class MySensors extends FragmentActivity {
 
 		// Load all available sensors
 		loadSensors();
-
 	}
 
 	// Called after onCreate has finished, use to restore UI state
@@ -217,6 +216,16 @@ public class MySensors extends FragmentActivity {
 		return false;
 	}
 
+	private boolean sensorExists(final Sensor sensor) {
+		boolean exists = false;
+		for (SensorListEntry sensorItem : sensorArray) {
+			exists = sensor == sensorItem.getSensor();
+			if (exists == true)
+				break;
+		}
+		return exists;
+	}
+
 	private void loadSensors() {
 
 		// Get references to UI widget (ListView) for sensors
@@ -228,20 +237,36 @@ public class MySensors extends FragmentActivity {
 
 		// Bind array adaptor to the ListView
 		sensorListView.setAdapter(sa);
-
+		
 		// Load array with each sensor available
 		for (Sensor sensor : mgr.getSensorList(Sensor.TYPE_ALL)) {
 
-			SensorListEntry sensorItem = new SensorListEntry(sensor);
+			boolean exists = false;
 
-			// Add this sensor to our list of sensors
-			sensorArray.add(sensorItem);
+			// Does this sensor exist in our list?
+			exists = sensorExists(sensor);
 
-			// Write some info to the log about this sensor
-			String text = String.format(getString(R.string.sensor_log),
-					SensorInterface.getType(sensor.getType()),
-					sensor.getName(), sensor.getVendor(), sensor.getVersion());
-			Log.d(TAG, text);
+			// Sensor does not exist, add it
+			if (exists == false) {
+				SensorListEntry sensorItem = new SensorListEntry(sensor);
+
+				// Add this sensor to our list of sensors
+				sensorArray.add(sensorItem);
+
+				// Write some info to the log about this sensor
+				String text = String.format(getString(R.string.sensor_log),
+						SensorInterface.getType(sensor.getType()),
+						sensor.getName(), sensor.getVendor(),
+						sensor.getVersion());
+				Log.d(TAG, text);
+			}
+		}
+
+		// Load number of sensors
+		TextView tv = (TextView) findViewById(R.id.number_of_sensors_found_value);
+		if (tv != null) {
+			Integer numSensors = sensorArray.size();
+			tv.setText(numSensors.toString());
 		}
 
 		// Notifies the attached View that the underlying data has been

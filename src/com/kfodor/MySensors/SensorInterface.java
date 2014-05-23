@@ -13,6 +13,9 @@ import android.text.Spanned;
  * Sensors a little easier.
  *
  */
+
+// TODO: Need to support sensors 14-20
+
 public class SensorInterface {
 
 	public final static String[] delay = { "Fastest", "Game", "UI", "Normal" };
@@ -26,7 +29,7 @@ public class SensorInterface {
 			"Rotation Vector", "Relative Humidity", "Ambient Temperature" };
 
 	private final static String[] units = { "?", "m/s&#178;", "&#181;T",
-			"&#176;", "rad/s;", "lx", "hPa", "&#176;C", "m", "m/s&#178;",
+			"&#176;", "rad/s", "lx", "hPa", "&#176;C", "m", "m/s&#178;",
 			"m/s&#178;", "", "%", "&#176;C" };
 
 	private final static int[] icons = { R.drawable.unknown_sensor,
@@ -59,6 +62,7 @@ public class SensorInterface {
 
 	// Initialize the Sensor Interface based on the type
 	// of sensor provided.
+	@SuppressWarnings("deprecation")
 	private void init() {
 		// Remove all elements from the array list
 		labels.clear();
@@ -70,17 +74,25 @@ public class SensorInterface {
 			break;
 		case Sensor.TYPE_ACCELEROMETER:
 		case Sensor.TYPE_MAGNETIC_FIELD:
-		case 9/* Sensor.TYPE_GRAVITY */: // TODO
-		case 10/* Sensor.TYPE_LINEAR_ACCELERATION */: // TODO
+		case Sensor.TYPE_GRAVITY:
+		case Sensor.TYPE_LINEAR_ACCELERATION:
 			labels.add(0, "Lateral");
 			labels.add(1, "Longitudinal");
 			labels.add(2, "Vertical");
 			break;
 		case Sensor.TYPE_GYROSCOPE:
-		case 3/* Sensor.TYPE_ORIENTATION */: // TODO
+		case Sensor.TYPE_ORIENTATION:
 			labels.add(0, "X-Axis [Azimuth]");
 			labels.add(1, "Y-Axis [Pitch]");
 			labels.add(2, "Z-Axis [Roll]");
+			break;
+		case Sensor.TYPE_GYROSCOPE_UNCALIBRATED:
+			labels.add(0, "X-Axis [Azimuth]");
+			labels.add(1, "Y-Axis [Pitch]");
+			labels.add(2, "Z-Axis [Roll]");
+			labels.add(3, "Estimated X-Axis [Azimuth]");
+			labels.add(4, "Estimated Y-Axis [Pitch]");
+			labels.add(5, "Estimated Z-Axis [Roll]");
 			break;
 		case Sensor.TYPE_PRESSURE:
 			labels.add(0, "Pressure");
@@ -88,19 +100,25 @@ public class SensorInterface {
 		case Sensor.TYPE_PROXIMITY:
 			labels.add(0, "Distance");
 			break;
-		case 13/* Sensor.TYPE_AMBIENT_TEMPERATURE */: // TODO
-		case 7/* Sensor.TYPE_TEMPERATURE */:
+		case Sensor.TYPE_AMBIENT_TEMPERATURE:
+		case Sensor.TYPE_TEMPERATURE:
 			labels.add(0, "Temperature");
 			break;
-		case 11/* Sensor.TYPE_ROTATION_VECTOR */: // TODO
+		case Sensor.TYPE_ROTATION_VECTOR:
 			labels.add(0, "X-Axis");
 			labels.add(1, "Y-Axis");
 			labels.add(2, "Z-Axis");
 			labels.add(3, "Optional");
 			break;
-		case 12/* sensor.TYPE_RELATIVE_HUMIDITY */: // TODO
+		case Sensor.TYPE_RELATIVE_HUMIDITY:
 			labels.add(0, "Humidity");
 			break;
+		case Sensor.TYPE_SIGNIFICANT_MOTION:
+		case Sensor.TYPE_STEP_COUNTER:
+		case Sensor.TYPE_STEP_DETECTOR:
+		case Sensor.TYPE_MAGNETIC_FIELD_UNCALIBRATED:
+		case Sensor.TYPE_GAME_ROTATION_VECTOR:
+		case Sensor.TYPE_GEOMAGNETIC_ROTATION_VECTOR:
 		default:
 			labels.add(0, "Unknown ");
 			break;
