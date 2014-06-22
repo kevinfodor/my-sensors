@@ -1,6 +1,7 @@
 package com.kfodor.MySensors;
 
 import java.util.ArrayList;
+
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -25,30 +26,39 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
+
 import com.kfodor.MySensors.MySensors;
 
 public class SensorView extends FragmentActivity implements
 		SensorEventListener, SensorRateChangeDlg.SensorRateChangeListener {
 
 	private static final String TAG = "SensorView";
+	private static final float NS2S = 1.0f / 1000000000.0f;
 
 	private SensorListEntry se; // The sensor list entry
 	private SensorInterface si; // The sensor interface to this sensor
 	private SensorManager mgr; // Sensor Manager
 
 	// Dynamic (real-time views)
-	TextView delay_view;
-	TextView event_count_view;
-	TextView timestamp_view;
-	TextView accuracy_view;
-	ArrayList<TextView> data_value_views;
+	private TextView delay_view;
+	private TextView event_count_view;
+	private TextView timestamp_view;
+	private TextView accuracy_view;
+	private TextView num_values_reported_view;
+	private TextView num_values_shown_view;
 
-	/*
-	 * there may be one or more data values for each sensor, so here we declare
-	 * an array list of text views to hold each data value and its label.
-	 */
+	// An array to hold text views with data entry values
+	private ArrayList<TextView> data_value_text_views;
 
-	private int event_counter = 0;
+	// Sensor event counter
+	private Integer event_counter = 0;
+
+	// Sensor number of reported values
+	private Integer num_reported_values = 0;
+
+	// Flag to indicate if the user wants to see all reported values or
+	// only the known (documented) ones.
+	private Boolean show_all_reported_values = false;
 
 	/** Called when the activity is first created. */
 	// Called at the start of the full lifetime.
@@ -65,7 +75,7 @@ public class SensorView extends FragmentActivity implements
 		// Extract calling activity provided 'extras'
 		// which will help us determine which sensor we
 		// are going to use in this activity.
-		getSensor();
+		prepareSensor();
 
 		// Initialize basic (static) sensor view
 		loadStaticView();
@@ -91,9 +101,9 @@ public class SensorView extends FragmentActivity implements
 
 		// Write some info to the log about this sensor
 		String text = String.format(getString(R.string.sensor_log),
-				SensorInterface.getType(si.sensor().getType()), si.sensor()
-						.getName(), si.sensor().getVendor(), si.sensor()
-						.getVersion());
+				SensorInterface.getType(si.getSensor().getType()), si
+						.getSensor().getName(), si.getSensor().getVendor(), si
+						.getSensor().getVersion());
 		Log.d(TAG, text);
 	}
 
@@ -201,7 +211,6 @@ public class SensorView extends FragmentActivity implements
 		// Prepare dialogs by id here...
 		default:
 		}
-
 		return;
 	}
 
@@ -225,7 +234,7 @@ public class SensorView extends FragmentActivity implements
 		// getResources().getConfiguration().orientation;
 		super.onConfigurationChanged(newConfig);
 
-		// Handle any configuration changes
+		// Handle any configuration changes here...
 
 	}
 
@@ -239,14 +248,59 @@ public class SensorView extends FragmentActivity implements
 		// Check for each known menu item
 		switch (id) {
 
+		// Change Event Rate...
+		case (R.id.change_event_rate): {
+			// Create an instance of the dialog fragment and show it.
+			DialogFragment rate = new SensorRateChangeDlg();
+			rate.show(getSupportFragmentManager(), "rate");
+
+			return true; // handled
+		}
+		// Show all reports...
+		case (R.id.show_all_reports): {
+
+			// Toggle checked state
+			boolean isChecked = !item.isChecked();
+
+			// Handle check/unchecked setting(toggled).
+			item.setChecked(isChecked);
+			show_all_reported_values = isChecked;
+
+			// Based on the check-box state, make data values visible/gone
+			int visibility = View.GONE;
+			if (show_all_reported_values == true) {
+				// Make all unknown data values visible. This means
+				// all reported values will be shown.
+				visibility = View.VISIBLE;
+				num_values_shown_view.setText(num_reported_values.toString());
+			} else {
+				// Make all unknown data values gone
+				visibility = View.GONE;
+				Integer num_shown_values = si.getNumLabels();
+				num_values_shown_view.setText(num_shown_values.toString());
+			}
+
+			// Reference the data values layout. This is a linear layout
+			// with one or more additional linear layouts for each sensor value.
+			LinearLayout ll = (LinearLayout) findViewById(R.id.data_values);
+
+			// Set visibility for unknown data values (visible/gone)
+			for (int i = si.getNumLabels(); i < num_reported_values; i++) {
+				View v = ll.getChildAt(i);
+				if (v != null) {
+					v.setVisibility(visibility);
+				}
+			}
+
+			return true; // handled
+		}
 		// Search...
-		case (R.id.web_search):
+		case (R.id.web_search): {
 
 			// Do a simple web search for the sensor
-			String url = "http://www.google.com/search?hl=en&q="
-					+ si.sensor().getVendor() + "+" + si.sensor().getName()
-					+ "+" + si.getType()
-					+ "&btnG=Search&aq=f&aqi=&aql=&oq=&gs_rfai=";
+			String url = String.format(getString(R.string.sensor_search_url),
+					si.getSensor().getVendor(), si.getSensor().getName(),
+					si.getType());
 
 			// Create a new intent to launch the web search
 			Intent i = new Intent(Intent.ACTION_VIEW);
@@ -256,16 +310,15 @@ public class SensorView extends FragmentActivity implements
 			startActivity(i);
 
 			return true;
-
-			// About...
-		case (R.id.about):
-			// ... Perform menu handler actions ...
-
+		}
+		// About...
+		case (R.id.about): {
 			// Create an instance of the dialog fragment and show it.
 			DialogFragment about = new AboutDlg();
 			about.show(getSupportFragmentManager(), "about");
 
 			return true; // handled
+		}
 		}
 
 		// Return false if you have not handled the menu item.
@@ -294,28 +347,52 @@ public class SensorView extends FragmentActivity implements
 
 		// Sensor changed event fired, verify it is the type we are
 		// handling currently.
-		if (event.sensor.getType() == this.si.sensor().getType()) {
+		if (event.sensor.getType() == this.si.getSensor().getType()) {
 
 			// Increment event counter
 			event_counter++;
 
-			for (int i = 0; (i < event.values.length)
-					&& (i < si.getNumValues()); i++) {
+			// Update event count text view with event data
+			event_count_view.setText(event_counter.toString());
 
-				// Update event count text view
-				event_count_view.setText(((Integer) event_counter).toString());
+			// Update accuracy text view with event data
+			accuracy_view.setText(SensorInterface
+					.accuracyToString((event.accuracy)));
 
-				// Convert time stamp to seconds and update timestamp view
-				Float ts = (float) event.timestamp / 1000000000.0f;
-				timestamp_view.setText(ts.toString());
+			// Convert time stamp to seconds and update time stamp view
+			Float ts = event.timestamp * NS2S;
+			timestamp_view.setText(ts.toString());
 
-				// Update accuracy text view
-				accuracy_view.setText(SensorInterface
-						.accuracyToString((event.accuracy)));
+			// Update the number of values reported and text view to show it.
+			num_reported_values = event.values.length;
+			num_values_reported_view.setText(num_reported_values.toString());
 
-				// Update data values text view
-				TextView tv = data_value_views.get(i);
-				tv.setText(String.valueOf(event.values[i]));
+			// Loop for each reported sensor value...
+			for (int i = 0; i < num_reported_values; i++) {
+
+				TextView tv;
+
+				// Check if we need a new data values text view for this value.
+				// This would happen if the sensor reports more values
+				// than what was documented or known previously.
+				if (i >= data_value_text_views.size()) {
+					int visibility = View.GONE;
+
+					// Check if we want to see these
+					if (show_all_reported_values == true) {
+						visibility = View.VISIBLE;
+					}
+
+					// Add a new data value view (with unknown label)
+					addDataValueView(i, visibility);
+				}
+
+				// Get text view for this sensor's data value
+				tv = data_value_text_views.get(i);
+				if (tv != null) {
+					// Update the text value
+					tv.setText(String.valueOf(event.values[i]));
+				}
 
 				// Write some info to the log about this sensor
 				String text = String.format(
@@ -329,7 +406,7 @@ public class SensorView extends FragmentActivity implements
 	}
 
 	// Simple method to retrieve the sensor we are viewing
-	private void getSensor() {
+	private void prepareSensor() {
 
 		// The parent activity passed to us the "sensor position"
 		// within the sensor list which this activity will handle.
@@ -360,6 +437,7 @@ public class SensorView extends FragmentActivity implements
 
 		ImageView iv;
 		TextView tv;
+		Sensor sensor = si.getSensor();
 
 		// Load sensor icon
 		iv = (ImageView) findViewById(R.id.sensor_icon);
@@ -369,33 +447,33 @@ public class SensorView extends FragmentActivity implements
 		// Load sensor name
 		tv = (TextView) findViewById(R.id.sensor_name);
 		if (tv != null) {
-			tv.setText(si.sensor().getName());
+			tv.setText(sensor.getName());
 		}
 		// Load sensor vendor
 		tv = (TextView) findViewById(R.id.sensor_vendor);
 		if (tv != null) {
-			tv.setText(si.sensor().getVendor());
+			tv.setText(sensor.getVendor());
 		}
 		// Load sensor version
 		tv = (TextView) findViewById(R.id.sensor_version);
 		if (tv != null) {
-			tv.setText(((Integer) si.sensor().getVersion()).toString());
+			tv.setText(((Integer) sensor.getVersion()).toString());
 		}
 		// Load sensor type
 		tv = (TextView) findViewById(R.id.sensor_type);
 		if (tv != null) {
 			tv.setText(si.getType() + " ("
-					+ ((Integer) si.sensor().getType()).toString() + ")");
+					+ ((Integer) sensor.getType()).toString() + ")");
 		}
 		// Load sensor power
 		tv = (TextView) findViewById(R.id.sensor_power);
 		if (tv != null) {
-			tv.setText(((Float) si.sensor().getPower()).toString());
+			tv.setText(((Float) sensor.getPower()).toString());
 		}
 		// Load sensor range
 		tv = (TextView) findViewById(R.id.sensor_range);
 		if (tv != null) {
-			tv.setText(((Float) si.sensor().getMaximumRange()).toString());
+			tv.setText(((Float) sensor.getMaximumRange()).toString());
 		}
 		// Load sensor range units
 		tv = (TextView) findViewById(R.id.sensor_range_units);
@@ -405,74 +483,101 @@ public class SensorView extends FragmentActivity implements
 		// Load sensor resolution
 		tv = (TextView) findViewById(R.id.sensor_resolution);
 		if (tv != null) {
-			tv.setText(((Float) si.sensor().getResolution()).toString());
+			tv.setText(((Float) sensor.getResolution()).toString());
 		}
-		// Load sensor range units
+		// Load sensor resolution units
 		tv = (TextView) findViewById(R.id.sensor_resolution_units);
 		if (tv != null) {
 			tv.setText(si.getUnits());
+		}
+		// Load sensor number of known values
+		tv = (TextView) findViewById(R.id.sensor_num_values);
+		if (tv != null) {
+			tv.setText(((Integer) si.getNumLabels()).toString());
 		}
 
 		return;
 	}
 
+	// Prepare a data value view
+	private View addDataValueView(int index, int visibility) {
+		TextView tv;
+
+		// Reference the data values layout. This is a linear layout
+		// with one or more additional linear layouts for each sensor value.
+		LinearLayout ll = (LinearLayout) findViewById(R.id.data_values);
+
+		// Get a layout inflater from the system
+		LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+		// Get the layout for sensor values
+		View v = vi.inflate(R.layout.sensor_values, ll, false);
+
+		// Get a reference to the data array text view
+		tv = (TextView) v.findViewById(R.id.data_array);
+		if (tv != null) {
+			// Set the data array text
+			String text = String.format(getString(R.string.sensor_data_format),
+					index);
+			tv.setText(text);
+		}
+
+		// Get a reference to the data label text view
+		tv = (TextView) v.findViewById(R.id.data_label);
+		if (tv != null) {
+			// Set the label/units text
+			String text = String.format(
+					getString(R.string.sensor_value_format),
+					si.getLabel(index), si.getUnits());
+			tv.setText(text);
+		}
+
+		// Get a reference to the data value text view
+		tv = (TextView) v.findViewById(R.id.data_value);
+		if (tv != null) {
+			// Set initial value
+			tv.setText(R.string.no_data_tag);
+
+			// Add this view to the array of text views for data values
+			data_value_text_views.add(tv);
+		}
+
+		// Set specified visibility
+		v.setVisibility(visibility);
+
+		// Add this view the parent layout
+		ll.addView(v);
+
+		return v;
+	}
+
 	// load and configure dynamic sensor information
 	private void loadRealTimeView() {
 
-		// Find views and keep them for later reference
+		// Find real-time views and keep them for later reference
 		delay_view = (TextView) findViewById(R.id.sensor_delay);
 		event_count_view = (TextView) findViewById(R.id.sensor_events);
 		timestamp_view = (TextView) findViewById(R.id.sensor_timestamp);
 		accuracy_view = (TextView) findViewById(R.id.sensor_accuracy);
-		accuracy_view.setText("Unknown");
+		num_values_reported_view = (TextView) findViewById(R.id.sensor_num_values_reported);
+		num_values_shown_view = (TextView) findViewById(R.id.sensor_num_values_shown);
 
-		data_value_views = new ArrayList<TextView>();
+		// Data values are an array of text views (one for each value reported)
+		// I have noticed that sometimes Android sensors will send (indicate)
+		// that they have more values available than they have documented.
+		// So one must be careful about sizes, lengths, etc.
+		data_value_text_views = new ArrayList<TextView>();
 
-		// reference the data values layout. This is a linear layout
-		// with one or more additional linear layouts for each sensor value.
-		LinearLayout ll = (LinearLayout) findViewById(R.id.data_values);
-
-		// For each of the sensor's values, initialize the views
-		// required to show each of them.
-		for (int i = 0; i < si.getNumValues(); i++) {
-
-			// Get a layout inflater from the system
-			LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			// Get the layout for sensor values
-			View v = vi.inflate(R.layout.sensor_values, ll, false);
-
-			TextView tv;
-
-			// Get a reference to the data array text view
-			tv = (TextView) v.findViewById(R.id.data_array);
-			if (tv != null) {
-				// Set the data array text
-				String text = String.format(
-						getString(R.string.sensor_data_format), i);
-				tv.setText(text);
-				// tv.setText("d[" + i + "] = ");
-			}
-			// Get a reference to the data label text view
-			tv = (TextView) v.findViewById(R.id.data_label);
-			if (tv != null) {
-				// Set the label/units text
-				String text = String.format(
-						getString(R.string.sensor_value_format),
-						si.getLabel(i), si.getUnits());
-				tv.setText(text);
-				// tv.setText(si.getLabel(i) + " (" + si.getUnits() + ") = ");
-			}
-			// Get a reference to the data value text view
-			tv = (TextView) v.findViewById(R.id.data_value);
-			if (tv != null) {
-				// Set initial value
-				tv.setText(R.string.no_data_tag);
-				// Add this view to the array of text views for data values
-				data_value_views.add(tv);
-			}
-			ll.addView(v); // Add this view the parent layout
-
+		// For each of the sensor's advertised values, initialize the views
+		// required to show each of the labels. At this point we only know
+		// the documented number of data labels for the sensor type provided.
+		Integer num_shown_values = si.getNumLabels();
+		for (int i = 0; i < num_shown_values; i++) {
+			addDataValueView(i, View.VISIBLE);
 		}
+
+		// Set the number of shown values (only known) by default
+		num_values_shown_view.setText(num_shown_values.toString());
 
 		return;
 	}
@@ -487,15 +592,16 @@ public class SensorView extends FragmentActivity implements
 			mgr.unregisterListener(SensorView.this);
 
 			// Register as a listener at the new set rate
-			boolean result = mgr.registerListener(this, si.sensor(), r);
+			boolean result = mgr.registerListener(this, si.getSensor(), r);
 			if (result == true) {
 				se.setRate(r);
 				delay_view.setText(SensorInterface.delayToString(r));
 				if (notify == true) {
-					Toast.makeText(
-							getApplicationContext(),
-							getString(R.string.sensor_rate_changed_tag)
-									+ SensorInterface.delayToString(r),
+					// Construct notification next
+					String notification_text = String.format(
+							getString(R.string.sensor_rate_changed_tag),
+							SensorInterface.delayToString(r));
+					Toast.makeText(getApplicationContext(), notification_text,
 							Toast.LENGTH_SHORT).show();
 				}
 			}

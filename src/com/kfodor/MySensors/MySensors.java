@@ -237,7 +237,7 @@ public class MySensors extends FragmentActivity {
 
 		// Bind array adaptor to the ListView
 		sensorListView.setAdapter(sa);
-		
+
 		// Load array with each sensor available
 		for (Sensor sensor : mgr.getSensorList(Sensor.TYPE_ALL)) {
 

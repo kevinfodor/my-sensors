@@ -22,7 +22,7 @@
     <string name="sensor_resolution_tag">"Resolution: "</string>
     <string name="sensor_delay_tag">"Event Delay: "</string>
     <string name="sensor_events_tag">"Events: "</string>
-    <string name="sensor_timestamp_tag">"Timestamp(s): "</string>
+    <string name="sensor_timestamp_tag">"Timestamp: "</string>
     <string name="sensor_accuracy_tag">"Accuracy: "</string>
     <string name="sensor_value_format">"%1$s (%2$s) = "</string>
     <string name="sensor_data_format">"d[%1$d] = "</string>
@@ -36,6 +36,7 @@
     <string name="milliamp_tag">mA</string>
     <string name="units_tag">units</string>
     <string name="change_event_update_rate_tag">Change Event Update Rate</string>
+    <string name="change_event_update_rate_menu_tag">Change Rate</string>
     <string name="search_web_tag">&quot;Search Web&#8230;&quot;</string>
     <string name="sensor_details_tag">Sensor Details</string>
     <string name="real_time_data_tag">Real-Time Data</string>
@@ -43,7 +44,13 @@
     <string name="reset_all_rates_notification_tag">All sensor event update rates set to %1$s</string>
     <string name="rate_change_choice_tag">Choose an event update rate:</string>
     <string name="no_data_tag">No data!</string>
-    <string name="sensor_rate_changed_tag">Changed event rate to </string>
+    <string name="sensor_rate_changed_tag">Changed event rate to %1$s</string>
     <string name="sensors_found_tag">Sensors Found</string>
-    
+    <string name="unknown_tag">Unknown</string>
+    <string name="sensor_num_values_known_tag">"Number of values known: "</string>
+    <string name="sensor_num_values_reported_tag">"Number of values shown: "</string>
+    <string name="show_all_reports_tag">Show All Reports</string>
+    <string name="sensor_search_url">"http://www.google.com/search?hl=en&amp;q=%1$s+%2$s+%3$s&amp;btnG=Search&amp;aq=f&amp;aqi=&amp;aql=&amp;oq=&amp;gs_rfai="</string>
+    <string name="sensor_values_shown_separator_tag">of</string>
+        
 </resources>

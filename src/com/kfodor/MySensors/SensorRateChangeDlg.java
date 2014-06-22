@@ -8,6 +8,9 @@ import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+import android.widget.ListAdapter;
+
+import com.kfodor.MySensors.SparseArrayAdaptor;
 
 public class SensorRateChangeDlg extends DialogFragment implements
 		OnClickListener, OnCancelListener {
@@ -37,15 +40,22 @@ public class SensorRateChangeDlg extends DialogFragment implements
 		// Instantiate an AlertDialog.Builder with its constructor
 		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
+		// Set dialog box title
 		builder.setTitle(getString(R.string.rate_change_choice_tag));
 
+		// Retrieve the current rate setting.
 		int delay = mListener.getRate();
-		builder.setSingleChoiceItems(SensorInterface.delay, delay,
+
+		ListAdapter delay_choices = new SparseArrayAdaptor<String>(
+				builder.getContext(), SensorInterface.delay);
+
+		builder.setSingleChoiceItems(delay_choices, delay,
 				new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int item) {
 						delay_picked = item;
 					}
 				});
+
 		builder.setPositiveButton(getString(android.R.string.ok),
 				new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {

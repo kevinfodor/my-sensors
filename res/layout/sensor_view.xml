@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/ScrollView01"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
+    android:layout_height="fill_parent">
+<RelativeLayout 
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    tools:context=".SensorView" >
 
     <TextView
         android:id="@+id/sensor_details"
@@ -52,7 +58,7 @@
             android:id="@+id/sensor_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/sensor_name_tag" />
+            android:text="@string/unknown_tag" />
     </LinearLayout>
 
     <LinearLayout
@@ -72,7 +78,7 @@
             android:id="@+id/sensor_vendor"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/sensor_vendor_tag" />
+            android:text="@string/unknown_tag" />
     </LinearLayout>
 
     <LinearLayout
@@ -92,7 +98,7 @@
             android:id="@+id/sensor_version"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/sensor_version_tag" />
+            android:text="@string/unknown_tag" />
     </LinearLayout>
 
     <LinearLayout
@@ -112,7 +118,7 @@
             android:id="@+id/sensor_type"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/sensor_type_tag" />
+            android:text="@string/unknown_tag" />
     </LinearLayout>
 
     <LinearLayout
@@ -137,6 +143,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="6dip"
             android:text="@string/milliamp_tag" />
     </LinearLayout>
 
@@ -163,6 +170,7 @@
             android:id="@+id/sensor_range_units"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="6dip"
             android:text="@string/units_tag" />
     </LinearLayout>
 
@@ -189,13 +197,34 @@
             android:id="@+id/sensor_resolution_units"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="6dip"
             android:text="@string/units_tag" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/sensor_num_values_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/sensor_resolution_layout"
+        android:layout_toRightOf="@+id/sensor_icon" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/sensor_num_values_known_tag"
+            android:textColor="@color/sensor_attributes" />
+
+        <TextView
+            android:id="@+id/sensor_num_values"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/zero_tag" />
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/sensor_resolution_layout"
+        android:layout_below="@+id/sensor_num_values_layout"
         android:orientation="vertical" >
 
         <TextView
@@ -240,7 +269,7 @@
                 android:id="@+id/sensor_accuracy"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/sensor_accuracy_tag" />
+                android:text="@string/unknown_tag" />
         </LinearLayout>
 
         <LinearLayout
@@ -258,7 +287,7 @@
                 android:id="@+id/sensor_delay"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/sensor_delay_tag" />
+                android:text="@string/unknown_tag" />
         </LinearLayout>
 
         <LinearLayout
@@ -298,6 +327,39 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/sensor_num_values_reported_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/sensor_num_values_reported_tag"
+                android:textColor="@color/sensor_attributes" />
+
+            <TextView
+                android:id="@+id/sensor_num_values_shown"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingRight="3dp"
+                android:text="@string/zero_tag" />
+            
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/sensor_values_shown_separator_tag"
+                android:textColor="@color/sensor_attributes" />
+
+            <TextView
+                android:id="@+id/sensor_num_values_reported"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="3dp"
+                android:text="@string/zero_tag" />
+
+            </LinearLayout>
+
+        <LinearLayout
             android:id="@+id/data_values"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -320,6 +382,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:text="@string/change_event_update_rate_tag" />
+
     </LinearLayout>
 
 </RelativeLayout>
+</ScrollView>
