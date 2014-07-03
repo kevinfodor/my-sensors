@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/ScrollView01"
+    android:id="@+id/sensor_scroll_view"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
 <RelativeLayout 
@@ -334,7 +334,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/sensor_num_values_reported_tag"
+                android:text="@string/sensor_num_values_tag"
                 android:textColor="@color/sensor_attributes" />
 
             <TextView
@@ -351,7 +351,7 @@
                 android:textColor="@color/sensor_attributes" />
 
             <TextView
-                android:id="@+id/sensor_num_values_reported"
+                android:id="@+id/sensor_num_values_available"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingLeft="3dp"

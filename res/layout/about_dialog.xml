@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/sensor_scroll_view"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+<RelativeLayout
     android:id="@+id/layout_root"
-    android:layout_width="wrap_content"
-    android:layout_height="fill_parent"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
     android:padding="10dp" >
 
     <ImageView
@@ -49,8 +54,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/about_image"
-        android:layout_below="@+id/about_version"
-        android:layout_marginTop="14dp"
+        android:layout_below="@+id/about_image"
+        android:layout_marginTop="20dp"
         android:text="@string/app_about_text" />
 
 </RelativeLayout>
+</ScrollView>

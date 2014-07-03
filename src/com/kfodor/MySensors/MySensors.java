@@ -186,15 +186,13 @@ public class MySensors extends FragmentActivity {
 			// For each sensor, reset update rates to default
 			for (SensorListEntry se : sensorArray) {
 
-				// Change the update rate to default
-				se.setRate(SensorListEntry.default_rate);
+				// Reset sensor views to defaults
+				se.reset();
 			}
 
 			// Construct notification next
 			String text = String
-					.format(getString(R.string.reset_all_rates_notification_tag),
-							SensorInterface
-									.delayToString(SensorListEntry.default_rate));
+					.format(getString(R.string.reset_all_sensor_views_to_defaults_tag));
 			// Show notification
 			Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT)
 					.show();

@@ -14,7 +14,8 @@ public class SparseArrayAdaptor<E> extends BaseAdapter {
 	private final LayoutInflater mInflater;
 
 	public SparseArrayAdaptor(Context context, SparseArray<E> array) {
-		mInflater = LayoutInflater.from(context);
+		mInflater = (LayoutInflater) context
+				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		this.array = array;
 	}
 

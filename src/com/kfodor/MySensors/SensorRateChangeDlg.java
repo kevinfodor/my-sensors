@@ -3,6 +3,7 @@ package com.kfodor.MySensors;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnClickListener;
@@ -35,10 +36,11 @@ public class SensorRateChangeDlg extends DialogFragment implements
 
 		// Use the Builder class for convenient dialog construction
 		Dialog dialog;
+		Context context = getActivity();
 
 		// Build this alert dialog box
 		// Instantiate an AlertDialog.Builder with its constructor
-		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 
 		// Set dialog box title
 		builder.setTitle(getString(R.string.rate_change_choice_tag));
@@ -46,8 +48,8 @@ public class SensorRateChangeDlg extends DialogFragment implements
 		// Retrieve the current rate setting.
 		int delay = mListener.getRate();
 
-		ListAdapter delay_choices = new SparseArrayAdaptor<String>(
-				builder.getContext(), SensorInterface.delay);
+		ListAdapter delay_choices = new SparseArrayAdaptor<String>(context,
+				SensorInterface.delay);
 
 		builder.setSingleChoiceItems(delay_choices, delay,
 				new DialogInterface.OnClickListener() {

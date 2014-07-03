@@ -26,7 +26,7 @@
         <activity
             android:name=".SensorView"
             class=".SensorView"
-            android:screenOrientation="nosensor" >
+            android:configChanges="orientation|screenSize">
         </activity>
     </application>
 
