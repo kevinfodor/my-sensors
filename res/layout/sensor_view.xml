@@ -360,13 +360,20 @@
             </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/data_values"
+            android:id="@+id/known_data_values"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dip"
             android:orientation="vertical" >
         </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/unknown_data_values"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+        </LinearLayout>
+        
         <TextView
             android:layout_width="fill_parent"
             android:layout_height="2dip"

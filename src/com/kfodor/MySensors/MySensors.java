@@ -214,6 +214,7 @@ public class MySensors extends FragmentActivity {
 		return false;
 	}
 
+	// A helper function to determine if a sensor is in our list
 	private boolean sensorExists(final Sensor sensor) {
 		boolean exists = false;
 		for (SensorListEntry sensorItem : sensorArray) {
@@ -224,6 +225,7 @@ public class MySensors extends FragmentActivity {
 		return exists;
 	}
 
+	// A helper function to load each sensor
 	private void loadSensors() {
 
 		// Get references to UI widget (ListView) for sensors
@@ -288,9 +290,9 @@ public class MySensors extends FragmentActivity {
 	}
 
 	/**
-	 * @return the sensorArray
+	 * @return the sensorArray(position)
 	 */
-	public static ArrayList<SensorListEntry> getSensorArray() {
-		return sensorArray;
+	public static SensorListEntry getSensorAt(int position) {
+		return sensorArray.get(position);
 	}
 }

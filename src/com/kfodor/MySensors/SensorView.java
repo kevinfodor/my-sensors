@@ -29,13 +29,13 @@ import android.support.v4.app.FragmentActivity;
 
 import com.kfodor.MySensors.MySensors;
 
-@SuppressWarnings("unused")
 public class SensorView extends FragmentActivity implements
 		SensorEventListener, SensorRateChangeDlg.SensorRateChangeListener {
 
 	private static final String TAG = "SensorView";
 	private static final float NS2S = 1.0f / 1000000000.0f;
 
+	// Initialized with initSensor()
 	private SensorListEntry se; // The sensor list entry
 	private SensorInterface si; // The sensor interface to this sensor
 	private SensorManager mgr; // Sensor Manager
@@ -45,6 +45,9 @@ public class SensorView extends FragmentActivity implements
 	private TextView event_count_view;
 	private TextView timestamp_view;
 	private TextView accuracy_view;
+	private LinearLayout known_ll;
+	private LinearLayout unknown_ll;
+	private ArrayList<TextView> data_value_views = new ArrayList<TextView>();
 	private TextView num_values_available_view;
 	private TextView num_values_shown_view;
 
@@ -69,7 +72,7 @@ public class SensorView extends FragmentActivity implements
 		// Extract calling activity provided 'extras'
 		// which will help us determine which sensor we
 		// are going to use in this activity.
-		prepareSensor();
+		initSensor();
 
 		// Initialize basic (static) sensor view
 		loadStaticView();
@@ -96,15 +99,11 @@ public class SensorView extends FragmentActivity implements
 		// Prevent rotation of the screen, due to sensor changes
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
 
-		// Request orientation based on settings
+		// Request orientation based on previous settings
 		setRequestedOrientation(se.getOrientation());
 
 		// Write some info to the log about this sensor
-		String text = String.format(getString(R.string.sensor_log),
-				SensorInterface.getType(si.getSensor().getType()), si
-						.getSensor().getName(), si.getSensor().getVendor(), si
-						.getSensor().getVersion());
-		Log.d(TAG, text);
+		writeSensorInfo();
 	}
 
 	// Called after onCreate has finished, use to restore UI state
@@ -294,7 +293,7 @@ public class SensorView extends FragmentActivity implements
 			item.setChecked(show_all_values);
 
 			// Update number of shown values
-			updateShownValues(show_all_values);
+			updateShownValues();
 
 			return true; // handled
 		}
@@ -371,85 +370,46 @@ public class SensorView extends FragmentActivity implements
 			num_available_values = event.values.length;
 			num_values_available_view.setText(num_available_values.toString());
 
-			// Reference the data values layout. This is a linear layout
-			// with one or more additional linear layouts for each sensor value.
-			LinearLayout ll = (LinearLayout) findViewById(R.id.data_values);
-
 			// Loop for each available sensor value...
 			for (int i = 0; i < num_available_values; i++) {
 
-				// Get child view for this sensor's data value
-				View cv = ll.getChildAt(i);
-
-				// Check if we need a data values child view for this value.
-				// This would happen if the sensor reports more values
-				// than what was documented or known previously.
-				if (cv != null) {
-					// Update the text view we have for the value
-					TextView tv = (TextView) cv.findViewById(R.id.data_value);
-					if (tv != null) {
-						// Update the text view with the value
-						tv.setText(String.valueOf(event.values[i]));
-					}
-				} else // We need a new one
-				{
-					Boolean show_all_values = se.getShowAllValues();
-
-					// Check if we want to see these values
-					int visibility;
-					if (show_all_values == true) {
-						visibility = View.VISIBLE;
-					} else {
-						visibility = View.GONE;
-					}
-
+				if (i >= data_value_views.size()) {
 					// Add a new data value child view (with unknown label)
-					addDataValueChildView(i, visibility);
-
-					// Update number of shown values
-					updateShownValues(show_all_values);
+					addDataValueChildView(i);
 				}
 
-				// Write some info to the log about this sensor
-				String text = String.format(
-						getString(R.string.sensor_data_format), i);
-				text += String.format(getString(R.string.sensor_value_format),
-						si.getLabel(i), si.getUnits());
-				text += String.valueOf(event.values[i]) + "\n";
-				Log.d(TAG, text);
+				// Get text view for this data value
+				TextView tv = data_value_views.get(i);
+
+				// Check for a valid view
+				if (tv != null) {
+					// Update the text view with the value
+					tv.setText(String.valueOf(event.values[i]));
+				}
+
+				// write info about this event's data
+				writeSensorData(i, event);
 			}
 		}
 	}
 
 	// Helper method to update number of 'shown' values
-	private void updateShownValues(Boolean show_all_values) {
+	private void updateShownValues() {
 
-		int visibility;
+		Boolean show_all_values = se.getShowAllValues();
 		Integer num_shown_values = si.getNumLabels();
-
-		// Reference the data values layout. This is a linear layout
-		// with one or more additional linear layouts for each sensor value.
-		LinearLayout ll = (LinearLayout) findViewById(R.id.data_values);
 
 		// Based on the 'show' state, make data values visible/gone
 		if (show_all_values == true) {
 			// Make all unknown data values visible. This means
 			// all available values will be shown.
-			visibility = View.VISIBLE;
+			unknown_ll.setVisibility(View.VISIBLE);
+
+			// Add the number of unknown values to the number shown.
+			num_shown_values += unknown_ll.getChildCount();
 		} else {
 			// Make all unknown data values gone
-			visibility = View.GONE;
-		}
-
-		// Set visibility for unknown data values (visible/gone)
-		for (int i = num_shown_values; i < ll.getChildCount(); i++) {
-			View v = ll.getChildAt(i);
-			if (v != null) {
-				v.setVisibility(visibility);
-				if (visibility == View.VISIBLE) {
-					num_shown_values++;
-				}
-			}
+			unknown_ll.setVisibility(View.GONE);
 		}
 
 		// Set number of shown values in view
@@ -457,7 +417,7 @@ public class SensorView extends FragmentActivity implements
 	}
 
 	// Simple method to retrieve the sensor we are viewing
-	private void prepareSensor() {
+	private void initSensor() {
 
 		// The parent activity passed to us the "sensor position"
 		// within the sensor list which this activity will handle.
@@ -474,7 +434,7 @@ public class SensorView extends FragmentActivity implements
 		mgr = (SensorManager) getSystemService(SENSOR_SERVICE);
 
 		// Extract the sensor at the given position in the list
-		se = MySensors.getSensorArray().get(position);
+		se = MySensors.getSensorAt(position);
 
 		// Now that we have the sensor, create a sensor interface object
 		// and assign it to the interface.
@@ -551,18 +511,25 @@ public class SensorView extends FragmentActivity implements
 	}
 
 	// Prepare a data value view
-	private View addDataValueChildView(int index, int visibility) {
+	private View addDataValueChildView(int index) {
 		TextView tv;
+		LinearLayout ll;
 
-		// Reference the data values layout. This is a linear layout
-		// with one or more additional linear layouts for each sensor value.
-		LinearLayout ll = (LinearLayout) findViewById(R.id.data_values);
+		// Get known/unknown LinearLayout based on index
+		if (index < si.getNumLabels()) {
+			ll = known_ll;
+		} else {
+			ll = unknown_ll;
+		}
 
 		// Get a layout inflater from the system
 		LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
 		// Get the layout for sensor values
 		View v = vi.inflate(R.layout.sensor_values, ll, false);
+
+		// Add this view to the parent layout
+		ll.addView(v);
 
 		// Get a reference to the data array text view
 		tv = (TextView) v.findViewById(R.id.data_array);
@@ -588,13 +555,13 @@ public class SensorView extends FragmentActivity implements
 		if (tv != null) {
 			// Set initial value
 			tv.setText(R.string.no_data_tag);
+
+			// Add this text view to an array for easy access later
+			data_value_views.add(tv);
 		}
 
-		// Set specified visibility
-		v.setVisibility(visibility);
-
-		// Add this view the parent layout
-		ll.addView(v);
+		// Update number of shown values
+		updateShownValues();
 
 		return v;
 	}
@@ -607,15 +574,22 @@ public class SensorView extends FragmentActivity implements
 		event_count_view = (TextView) findViewById(R.id.sensor_events);
 		timestamp_view = (TextView) findViewById(R.id.sensor_timestamp);
 		accuracy_view = (TextView) findViewById(R.id.sensor_accuracy);
+
+		// Reference the data values layout. This is a linear layout
+		// with one or more additional linear layouts for each sensor value.
+		known_ll = (LinearLayout) findViewById(R.id.known_data_values);
+		unknown_ll = (LinearLayout) findViewById(R.id.unknown_data_values);
+
+		// Reference the number of values shown and available text views.
 		num_values_shown_view = (TextView) findViewById(R.id.sensor_num_values_shown);
 		num_values_available_view = (TextView) findViewById(R.id.sensor_num_values_available);
 
 		// For each of the sensor's advertised values, initialize the views
 		// required to show each of the labels. At this point we only know
 		// the documented number of data labels for the sensor type provided.
-		Integer num_shown_values = si.getNumLabels();
-		for (int i = 0; i < num_shown_values; i++) {
-			addDataValueChildView(i, View.VISIBLE);
+		Integer num_known_values = si.getNumLabels();
+		for (int i = 0; i < num_known_values; i++) {
+			addDataValueChildView(i);
 		}
 
 		return;
@@ -627,8 +601,6 @@ public class SensorView extends FragmentActivity implements
 		// Check if we are changing the rate, or this is being
 		// done for the first time (with no notification)
 		if ((r != se.getRate()) || (notify == false)) {
-			// Unregister anything which was previously registered
-			mgr.unregisterListener(SensorView.this);
 
 			// Register as a listener at the new set rate
 			boolean result = mgr.registerListener(this, si.getSensor(), r);
@@ -640,6 +612,7 @@ public class SensorView extends FragmentActivity implements
 					String notification_text = String.format(
 							getString(R.string.sensor_rate_changed_tag),
 							SensorInterface.delayToString(r));
+					// Post notification
 					Toast.makeText(getApplicationContext(), notification_text,
 							Toast.LENGTH_SHORT).show();
 				}
@@ -662,8 +635,33 @@ public class SensorView extends FragmentActivity implements
 	@Override
 	public void onRateChange(int rate_picked) {
 		// User touched the dialog's positive button
+
+		// Unregister anything which was previously registered
+		mgr.unregisterListener(SensorView.this);
+
+		// Register sensor listener at chosen rate
 		registerSensorListener(rate_picked, true);
+
 		return;
 	}
 
+	// Simple write member function to dump information about this sensor
+	private void writeSensorInfo() {
+		// Write some info to the log about this sensor
+		String text = String.format(getString(R.string.sensor_log),
+				SensorInterface.getType(si.getSensor().getType()), si
+						.getSensor().getName(), si.getSensor().getVendor(), si
+						.getSensor().getVersion());
+		Log.d(TAG, text);
+	}
+
+	// Simple write member function to dump sensor data
+	private void writeSensorData(int i, SensorEvent event) {
+		// Write some info to the log about this sensor
+		String text = String.format(getString(R.string.sensor_data_format), i);
+		text += String.format(getString(R.string.sensor_value_format),
+				si.getLabel(i), si.getUnits());
+		text += String.valueOf(event.values[i]) + "\n";
+		Log.d(TAG, text);
+	}
 }
