@@ -3,7 +3,7 @@
 
     <item
         android:id="@+id/rotate_screen"
-        android:alphabeticShortcut="r"
+        android:alphabeticShortcut="o"
         android:icon="@android:drawable/ic_menu_rotate"
         android:numericShortcut="0"
         android:title="@string/rotate_screen_tag"
@@ -25,6 +25,14 @@
         android:numericShortcut="2"
         android:title="@string/show_all_values_tag"
         android:titleCondensed="@string/show_all_values_tag">
+    </item>
+    <item
+        android:id="@+id/reset"
+        android:alphabeticShortcut="r"
+        android:icon="@android:drawable/ic_menu_revert"
+        android:numericShortcut="0"
+        android:title="@string/reset_sensor_view_menu_tag"
+        android:titleCondensed="Reset">
     </item>
     <item
         android:id="@+id/web_search"

@@ -2,15 +2,18 @@ package com.kfodor.MySensors;
 
 import java.util.ArrayList;
 
+import android.app.ActionBar;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -27,29 +30,36 @@ import android.widget.Toast;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 
-import com.kfodor.MySensors.MySensors;
-
 public class SensorView extends FragmentActivity implements
 		SensorEventListener, SensorRateChangeDlg.SensorRateChangeListener {
 
+	// Keys for extras put onto the intent launch
+	public static final String SENSOR_INDEX_EXTRA = "SensorIndex";
+
+	// Helpful sensor constants
 	private static final String TAG = "SensorView";
 	private static final float NS2S = 1.0f / 1000000000.0f;
 
 	// Initialized with initSensor()
-	private SensorListEntry se; // The sensor list entry
-	private SensorInterface si; // The sensor interface to this sensor
-	private SensorManager mgr; // Sensor Manager
+	private SensorManager mgr = null; // Sensor Manager
+	private SensorInterface si = null; // The interface to this sensor
 
-	// Dynamic (real-time views)
-	private TextView delay_view;
-	private TextView event_count_view;
-	private TextView timestamp_view;
-	private TextView accuracy_view;
-	private LinearLayout known_ll;
-	private LinearLayout unknown_ll;
+	// Dynamic (real-time views) references for quick/easy reference while
+	// updating. Initialized with initRealTimeViews()
+	private TextView delay_view = null;
+	private TextView event_count_view = null;
+	private TextView timestamp_view = null;
+	private TextView accuracy_view = null;
+	private LinearLayout known_ll = null;
+	private LinearLayout unknown_ll = null;
+	private TextView num_values_available_view = null;
+	private TextView num_values_shown_view = null;
 	private ArrayList<TextView> data_value_views = new ArrayList<TextView>();
-	private TextView num_values_available_view;
-	private TextView num_values_shown_view;
+
+	// This sensor view settings (persistent)
+	private SensorViewSettings settings = null;
+	SharedPreferences preferences = null;
+	private String settings_name = null;
 
 	// Sensor event counter
 	private Integer event_counter = 0;
@@ -57,8 +67,12 @@ public class SensorView extends FragmentActivity implements
 	// Sensor number of available values
 	private Integer num_available_values = 0;
 
-	/** Called when the activity is first created. */
-	// Called at the start of the full lifetime.
+	/*
+	 * Called when the activity is first created. This is where you should do
+	 * all of your normal static set up: create views, bind data to lists, etc.
+	 * This method also provides you with a Bundle containing the activity's
+	 * previously frozen state, if there was one. Always followed by onStart().
+	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -69,16 +83,47 @@ public class SensorView extends FragmentActivity implements
 		// Inflate sensor view
 		setContentView(R.layout.sensor_view);
 
+		// Make sure we're running on Honeycomb or higher to use ActionBar APIs
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+			// For the main activity, make sure the app icon in the action bar
+			// does not behave as a button
+			ActionBar actionBar = getActionBar();
+			actionBar.setHomeButtonEnabled(false);
+		}
+
 		// Extract calling activity provided 'extras'
 		// which will help us determine which sensor we
 		// are going to use in this activity.
-		initSensor();
+		int index;
+
+		// Verify that we can retrieve the sensor entry passed to us
+		// for this view.
+		try {
+			Bundle extras = getIntent().getExtras();
+			// The parent activity passed to us the "sensor position"
+			// within the sensor list which this activity will handle.
+			index = extras.getInt(SensorView.SENSOR_INDEX_EXTRA, 0);
+		} catch (NullPointerException e) {
+			// The entry is not available, throw exception
+			throw new NullPointerException(TAG + ": cannot get extras.");
+		}
+
+		// Construct a unique sensor view settings name. This name
+		// is used to store this view's settings.
+		settings_name = SensorView.getName(getApplicationContext(), index);
+
+		// Restore settings
+		preferences = getSharedPreferences(settings_name, MODE_PRIVATE);
+		settings = SensorViewSettings.restore(preferences);
+
+		// Initialize the sensor we are using
+		initSensor(index);
 
 		// Initialize basic (static) sensor view
 		loadStaticView();
 
-		// Initialize real-time (dynamic) sensor view
-		loadRealTimeView();
+		// Initialize real-time (dynamic) sensor view references
+		initRealTimeViews();
 
 		// Add a button listener to change the event update rate
 		final Button rb = (Button) findViewById(R.id.RateButton);
@@ -99,69 +144,51 @@ public class SensorView extends FragmentActivity implements
 		// Prevent rotation of the screen, due to sensor changes
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
 
-		// Request orientation based on previous settings
-		setRequestedOrientation(se.getOrientation());
-
-		// Write some info to the log about this sensor
-		writeSensorInfo();
+		// Apply settings
+		applySettings();
 	}
 
-	// Called after onCreate has finished, use to restore UI state
+	/*
+	 * Called after onCreate has finished, use to restore UI state. from the
+	 * savedInstanceState. This bundle has also been passed to onCreate.
+	 */
 	@Override
 	public void onRestoreInstanceState(Bundle savedInstanceState) {
+		// Always call the superclass first
 		super.onRestoreInstanceState(savedInstanceState);
-		// Restore UI state from the savedInstanceState.
-		// This bundle has also been passed to onCreate.
 		Log.d(TAG, "onRestoreInstanceState\n");
 	}
 
-	// Called before subsequent visible lifetimes
-	// for an activity process.
-	@Override
-	public void onRestart() {
-		super.onRestart();
-		// Load changes knowing that the activity has already
-		// been visible within this process.
-		Log.d(TAG, "onRestart\n");
-	}
-
-	// Called at the start of the visible lifetime.
+	/*
+	 * Called at the start of the visible lifetime. Apply any required UI change
+	 * now that the Activity is visible.
+	 */
 	@Override
 	public void onStart() {
 		super.onStart();
-		// Apply any required UI change now that the Activity is visible.
 		Log.d(TAG, "onStart\n");
 	}
 
-	// Called at the start of the active lifetime.
+	/*
+	 * Called at the start of the active lifetime. Resume any paused UI updates,
+	 * threads, or processes required. by the activity but suspended when it was
+	 * inactive.
+	 */
 	@Override
 	public void onResume() {
 		super.onResume();
-		// Resume any paused UI updates, threads, or processes required
-		// by the activity but suspended when it was inactive.
 		Log.d(TAG, "onResume\n");
 
-		// Register sensor listener at previously set rate until changed
-		registerSensorListener(se.getRate(), false);
+		registerSensorListener(settings.getRate(), false);
 	}
 
-	// Called to save UI state changes at the
-	// end of the active life cycle.
-	@Override
-	public void onSaveInstanceState(Bundle savedInstanceState) {
-		// Save UI state changes to the savedInstanceState.
-		// This bundle will be passed to onCreate if the process is
-		// killed and restarted.
-		super.onSaveInstanceState(savedInstanceState);
-		Log.d(TAG, "onSaveInstanceState\n");
-	}
-
-	// Called at the end of the active lifetime.
+	/*
+	 * Called at the end of the active lifetime. Suspend UI updates, threads, or
+	 * CPU intensive processes that don’t need to be updated when the Activity
+	 * isn’t the active foreground activity.
+	 */
 	@Override
 	public void onPause() {
-		// Suspend UI updates, threads, or CPU intensive processes
-		// that don’t need to be updated when the Activity isn’t
-		// the active foreground activity.
 		super.onPause();
 		Log.d(TAG, "onPause\n");
 
@@ -169,22 +196,57 @@ public class SensorView extends FragmentActivity implements
 		mgr.unregisterListener(this);
 	}
 
-	// Called at the end of the visible lifetime.
+	/*
+	 * Called at the end of the visible lifetime. Suspend remaining UI updates,
+	 * threads, or processing that aren’t required when the Activity isn’t
+	 * visible. Persist all edits or state changes as after this call the
+	 * process is likely to be killed. (non-Javadoc)
+	 * 
+	 * @see android.support.v4.app.FragmentActivity#onStop()
+	 */
 	@Override
 	public void onStop() {
-		// Suspend remaining UI updates, threads, or processing
-		// that aren’t required when the Activity isn’t visible.
-		// Persist all edits or state changes
-		// as after this call the process is likely to be killed.
 		super.onStop();
 		Log.d(TAG, "onStop\n");
+
+		// Save settings
+		preferences = getSharedPreferences(settings_name, MODE_PRIVATE);
+		settings.save(preferences);
 	}
 
-	// Called at the end of the full lifetime.
+	/*
+	 * Called before subsequent visible lifetimes for an activity process. Load
+	 * changes knowing that the activity has already been visible within this
+	 * process. Next call is onStart.
+	 */
+	@Override
+	public void onRestart() {
+		super.onRestart();
+		Log.d(TAG, "onRestart\n");
+	}
+
+	/*
+	 * Called to save UI state changes at the end of the active life cycle. Save
+	 * UI state changes to the savedInstanceState. (non-Javadoc)
+	 * 
+	 * @see
+	 * android.support.v4.app.FragmentActivity#onSaveInstanceState(android.os
+	 * .Bundle) This bundle will be passed to onCreate if the process is killed
+	 * and restarted. This is called just before the activity is destroyed.
+	 */
+	@Override
+	public void onSaveInstanceState(Bundle savedInstanceState) {
+		// Always call the superclass so it can save the view hierarchy state
+		super.onSaveInstanceState(savedInstanceState);
+		Log.d(TAG, "onSaveInstanceState\n");
+	}
+
+	/*
+	 * Called at the end of the full lifetime. Clean up any resources including
+	 * ending threads, closing database connections etc.
+	 */
 	@Override
 	public void onDestroy() {
-		// Clean up any resources including ending threads,
-		// closing database connections etc.
 		super.onDestroy();
 		Log.d(TAG, "onDestroy\n");
 	}
@@ -237,7 +299,7 @@ public class SensorView extends FragmentActivity implements
 		super.onPrepareOptionsMenu(menu);
 
 		// Get state of menu options
-		Boolean checked = se.getShowAllValues();
+		Boolean checked = settings.getShowAllValues();
 		menu.findItem(R.id.show_all_values).setChecked(checked);
 		return true;
 	}
@@ -256,7 +318,7 @@ public class SensorView extends FragmentActivity implements
 		case (R.id.rotate_screen): {
 
 			// Get current orientation
-			Integer orientation = se.getOrientation();
+			Integer orientation = settings.getOrientation();
 
 			// Toggle orientation
 			if (orientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
@@ -266,7 +328,7 @@ public class SensorView extends FragmentActivity implements
 			}
 
 			// Store new orientation
-			se.setOrientation(orientation);
+			settings.setOrientation(orientation);
 
 			// Request new orientation
 			setRequestedOrientation(orientation);
@@ -285,15 +347,23 @@ public class SensorView extends FragmentActivity implements
 		case (R.id.show_all_values): {
 
 			// Toggle current 'show' state
-			Boolean show_all_values = se.getShowAllValues();
+			Boolean show_all_values = settings.getShowAllValues();
 			show_all_values = !show_all_values;
-			se.setShowAllValues(show_all_values);
+			settings.setShowAllValues(show_all_values);
 
 			// Handle check/unchecked setting.
 			item.setChecked(show_all_values);
 
 			// Update number of shown values
 			updateShownValues();
+
+			return true; // handled
+		}
+		// Reset view...
+		case (R.id.reset): {
+
+			settings.reset();
+			applySettings();
 
 			return true; // handled
 		}
@@ -335,7 +405,7 @@ public class SensorView extends FragmentActivity implements
 		// in any case we just log the event.
 		String text = String.format(
 				getString(R.string.sensor_accuracy_changed), sensor.getName(),
-				accuracy);
+				SensorInterface.accuracyToString(accuracy));
 		Log.d(TAG, text);
 	}
 
@@ -378,6 +448,9 @@ public class SensorView extends FragmentActivity implements
 					addDataValueChildView(i);
 				}
 
+				// Update number of shown values
+				updateShownValues();
+
 				// Get text view for this data value
 				TextView tv = data_value_views.get(i);
 
@@ -387,16 +460,26 @@ public class SensorView extends FragmentActivity implements
 					tv.setText(String.valueOf(event.values[i]));
 				}
 
-				// write info about this event's data
+				// write sensor info about this event's data
 				writeSensorData(i, event);
 			}
 		}
 	}
 
+	// Helper method to construct a string which will uniquely identify
+	// the settings for this sensor's view
+	public final static String getName(Context context, int index) {
+		// Construct a unique sensor view settings name. This name
+		// is used to store this view's settings.
+		final String name = context.getPackageName() + "."
+				+ SensorViewSettings.TAG + "." + String.valueOf(index);
+		return name;
+	}
+
 	// Helper method to update number of 'shown' values
 	private void updateShownValues() {
 
-		Boolean show_all_values = se.getShowAllValues();
+		Boolean show_all_values = settings.getShowAllValues();
 		Integer num_shown_values = si.getNumLabels();
 
 		// Based on the 'show' state, make data values visible/gone
@@ -417,28 +500,22 @@ public class SensorView extends FragmentActivity implements
 	}
 
 	// Simple method to retrieve the sensor we are viewing
-	private void initSensor() {
+	private void initSensor(int index) {
 
-		// The parent activity passed to us the "sensor position"
-		// within the sensor list which this activity will handle.
-		Bundle extras = getIntent().getExtras();
-		if (extras == null) {
-			// Bail!
-			finish();
-		}
-
-		// Get sensor position in list
-		int position = extras.getInt("SensorPosition");
-
-		// Acquire Sensor Manager
+		// Find this sensor by index
 		mgr = (SensorManager) getSystemService(SENSOR_SERVICE);
+		Sensor sensor = MySensors.findSensor(mgr, index);
 
-		// Extract the sensor at the given position in the list
-		se = MySensors.getSensorAt(position);
+		String text = String.format("%s assigned, using sensor index: %d",
+				sensor.getName(), index);
+		Log.d(TAG, text);
 
 		// Now that we have the sensor, create a sensor interface object
 		// and assign it to the interface.
-		si = new SensorInterface(se.getSensor());
+		si = new SensorInterface(sensor);
+
+		// Write some info to the log about this sensor
+		writeSensorInfo(index);
 
 		return;
 	}
@@ -560,14 +637,11 @@ public class SensorView extends FragmentActivity implements
 			data_value_views.add(tv);
 		}
 
-		// Update number of shown values
-		updateShownValues();
-
 		return v;
 	}
 
-	// load and configure dynamic sensor information
-	private void loadRealTimeView() {
+	// load dynamic sensor view information for quick reference in real-time
+	private void initRealTimeViews() {
 
 		// Find real-time views and keep them for later reference
 		delay_view = (TextView) findViewById(R.id.sensor_delay);
@@ -584,9 +658,11 @@ public class SensorView extends FragmentActivity implements
 		num_values_shown_view = (TextView) findViewById(R.id.sensor_num_values_shown);
 		num_values_available_view = (TextView) findViewById(R.id.sensor_num_values_available);
 
-		// For each of the sensor's advertised values, initialize the views
-		// required to show each of the labels. At this point we only know
-		// the documented number of data labels for the sensor type provided.
+		/*
+		 * For each of the sensor's advertised values, initialize the views
+		 * required to show each of the labels. At this point we only know the
+		 * documented number of data labels for the sensor type provided.
+		 */
 		Integer num_known_values = si.getNumLabels();
 		for (int i = 0; i < num_known_values; i++) {
 			addDataValueChildView(i);
@@ -595,27 +671,24 @@ public class SensorView extends FragmentActivity implements
 		return;
 	}
 
-	// Helper function to register and unregister a sensor listener
+	// Helper functions to register and unregister a sensor listener
 	private void registerSensorListener(int r, boolean notify) {
 
-		// Check if we are changing the rate, or this is being
-		// done for the first time (with no notification)
-		if ((r != se.getRate()) || (notify == false)) {
+		// Unregister anything which was previously registered
+		mgr.unregisterListener(SensorView.this);
 
-			// Register as a listener at the new set rate
-			boolean result = mgr.registerListener(this, si.getSensor(), r);
-			if (result == true) {
-				se.setRate(r);
-				delay_view.setText(SensorInterface.delayToString(r));
-				if (notify == true) {
-					// Construct notification next
-					String notification_text = String.format(
-							getString(R.string.sensor_rate_changed_tag),
-							SensorInterface.delayToString(r));
-					// Post notification
-					Toast.makeText(getApplicationContext(), notification_text,
-							Toast.LENGTH_SHORT).show();
-				}
+		// Register as a listener at the new set rate
+		boolean result = mgr.registerListener(this, si.getSensor(), r);
+		if (result == true) {
+			delay_view.setText(SensorInterface.delayToString(r));
+			if (notify == true) {
+				// Construct notification next
+				String notification_text = String.format(
+						getString(R.string.sensor_rate_changed_tag),
+						SensorInterface.delayToString(r));
+				// Post notification
+				Toast.makeText(getApplicationContext(), notification_text,
+						Toast.LENGTH_SHORT).show();
 			}
 		}
 
@@ -626,7 +699,7 @@ public class SensorView extends FragmentActivity implements
 	// defined by the SensorRateChangeDlg.SensorRateChangeListener interface
 	@Override
 	public int getRate() {
-		return se.getRate();
+		return settings.getRate();
 	}
 
 	// The dialog fragment receives a reference to this Activity through the
@@ -636,22 +709,18 @@ public class SensorView extends FragmentActivity implements
 	public void onRateChange(int rate_picked) {
 		// User touched the dialog's positive button
 
-		// Unregister anything which was previously registered
-		mgr.unregisterListener(SensorView.this);
-
 		// Register sensor listener at chosen rate
 		registerSensorListener(rate_picked, true);
-
+		settings.setRate(rate_picked);
 		return;
 	}
 
 	// Simple write member function to dump information about this sensor
-	private void writeSensorInfo() {
+	private void writeSensorInfo(int index) {
 		// Write some info to the log about this sensor
-		String text = String.format(getString(R.string.sensor_log),
+		String text = String.format(getString(R.string.sensor_log), index,
 				SensorInterface.getType(si.getSensor().getType()), si
-						.getSensor().getName(), si.getSensor().getVendor(), si
-						.getSensor().getVersion());
+						.getSensor().hashCode(), si.getSensor().toString());
 		Log.d(TAG, text);
 	}
 
@@ -663,5 +732,18 @@ public class SensorView extends FragmentActivity implements
 				si.getLabel(i), si.getUnits());
 		text += String.valueOf(event.values[i]) + "\n";
 		Log.d(TAG, text);
+	}
+
+	// Helper function to apply current settings
+	private void applySettings() {
+
+		// Update number of shown values
+		updateShownValues();
+
+		// Request orientation based on settings
+		setRequestedOrientation(settings.getOrientation());
+
+		// Register sensor listener based on settings
+		registerSensorListener(settings.getRate(), false);
 	}
 }

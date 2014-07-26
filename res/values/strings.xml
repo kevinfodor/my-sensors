@@ -26,8 +26,8 @@
     <string name="sensor_accuracy_tag">"Accuracy: "</string>
     <string name="sensor_value_format">"%1$s (%2$s) = "</string>
     <string name="sensor_data_format">"d[%1$d] = "</string>
-    <string name="sensor_log">"Sensor: %1$s %2$s %3$s Version:%4$d\n"</string>
-    <string name="sensor_accuracy_changed">"%1$s sensor accuracy changed to %2$d)\n"</string>
+    <string name="sensor_log">"Sensor #%1$d: Type: %2$s hashCode: %3$d '%4$s'\n"</string>
+    <string name="sensor_accuracy_changed">"%1$s accuracy changed to %2$s\n"</string>
     <string name="about_tag">&quot;About&#8230;&quot;</string>
     <string name="value_array_tag">d[x] = </string>
     <string name="label_tag">Label = </string>
@@ -40,6 +40,7 @@
     <string name="search_web_tag">&quot;Search Web&#8230;&quot;</string>
     <string name="sensor_details_tag">Sensor Details</string>
     <string name="real_time_data_tag">Real-Time Data</string>
+    <string name="reset_sensor_view_menu_tag">Reset Sensor View</string>
     <string name="reset_all_sensor_views_menu_tag">Reset Sensor Views</string>
     <string name="reset_all_sensor_views_to_defaults_tag">All sensor views RESET to defaults</string>
     <string name="rate_change_choice_tag">Choose an event update rate:</string>

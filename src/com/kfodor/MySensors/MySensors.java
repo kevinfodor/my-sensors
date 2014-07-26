@@ -1,10 +1,14 @@
 package com.kfodor.MySensors;
 
 import java.util.ArrayList;
+
+import android.app.ActionBar;
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -23,14 +27,16 @@ public class MySensors extends FragmentActivity {
 
 	private static final String TAG = "MySensors";
 
-	// Sensor Manager
-	private SensorManager mgr;
+	// Create an array list of sensors. This array is used to display
+	// an annotated list of all available sensors on the device.
+	private static ArrayList<SensorListEntry> sensorArray = new ArrayList<SensorListEntry>();
 
-	// Create an array list of sensors
-	private static final ArrayList<SensorListEntry> sensorArray = new ArrayList<SensorListEntry>();
-
-	/** Called when the activity is first created. */
-	// Called at the start of the full lifetime.
+	/*
+	 * Called when the activity is first created. This is where you should do
+	 * all of your normal static set up: create views, bind data to lists, etc.
+	 * This method also provides you with a Bundle containing the activity's
+	 * previously frozen state, if there was one. Always followed by onStart().
+	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -41,86 +47,147 @@ public class MySensors extends FragmentActivity {
 		// Inflate view
 		setContentView(R.layout.main);
 
-		// Acquire sensor manager
-		mgr = (SensorManager) getSystemService(SENSOR_SERVICE);
+		// Make sure we're running on Honeycomb or higher to use ActionBar APIs
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+			// For the main activity, make sure the app icon in the action bar
+			// does not behave as a button
+			ActionBar actionBar = getActionBar();
+			actionBar.setHomeButtonEnabled(false);
+		}
 
 		// Load all available sensors
 		loadSensors();
 	}
 
-	// Called after onCreate has finished, use to restore UI state
+	/*
+	 * Called after onCreate has finished, use to restore UI state. from the
+	 * savedInstanceState. This bundle has also been passed to onCreate.
+	 */
 	@Override
 	public void onRestoreInstanceState(Bundle savedInstanceState) {
+		// Always call the superclass first
 		super.onRestoreInstanceState(savedInstanceState);
-		// Restore UI state from the savedInstanceState.
-		// This bundle has also been passed to onCreate.
 		Log.d(TAG, "onRestoreInstanceState\n");
 	}
 
-	// Called before subsequent visible lifetimes
-	// for an activity process.
-	@Override
-	public void onRestart() {
-		super.onRestart();
-		// Load changes knowing that the activity has already
-		// been visible within this process.
-		Log.d(TAG, "onRestart\n");
-	}
-
-	// Called at the start of the visible lifetime.
+	/*
+	 * Called at the start of the visible lifetime. Apply any required UI change
+	 * now that the Activity is visible.
+	 */
 	@Override
 	public void onStart() {
 		super.onStart();
-		// Apply any required UI change now that the Activity is visible.
 		Log.d(TAG, "onStart\n");
+
+		// Apply any required UI change now that the Activity is visible.
+
+		// Get references to UI widget (ListView) for sensors
+		ListView sensorListView = (ListView) findViewById(R.id.sensors);
+
+		// Create a Sensor adapter to bind the array to the list view
+		final SensorAdapter sa;
+		sa = new SensorAdapter(this, R.layout.sensor_item, sensorArray);
+
+		// Bind array adaptor to the ListView
+		sensorListView.setAdapter(sa);
+
+		// Load number of sensors into view so it can be shown
+		TextView tv = (TextView) findViewById(R.id.number_of_sensors_found_value);
+		if (tv != null) {
+			Integer numSensors = sensorArray.size();
+			tv.setText(numSensors.toString());
+		}
+
+		// Notifies the attached View that the underlying data has been
+		// changed and it should refresh itself.
+		sa.notifyDataSetChanged();
+
+		// Set a listener to respond to list item clicks
+		sensorListView.setOnItemClickListener(new OnItemClickListener() {
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+
+				// Launch a new Activity to display the selected sensor
+				Intent intent = new Intent(MySensors.this, SensorView.class);
+
+				// Push the sensor index to the new Activity
+				intent.putExtra(SensorView.SENSOR_INDEX_EXTRA, position);
+
+				// Start the activity
+				startActivity(intent);
+			}
+		});
 	}
 
-	// Called at the start of the active lifetime.
+	/*
+	 * Called at the start of the active lifetime. Resume any paused UI updates,
+	 * threads, or processes required. by the activity but suspended when it was
+	 * inactive.
+	 */
 	@Override
 	public void onResume() {
 		super.onResume();
-		// Resume any paused UI updates, threads, or processes required
-		// by the activity but suspended when it was inactive.
 		Log.d(TAG, "onResume\n");
 	}
 
-	// Called to save UI state changes at the
-	// end of the active life cycle.
-	@Override
-	public void onSaveInstanceState(Bundle savedInstanceState) {
-		// Save UI state changes to the savedInstanceState.
-		// This bundle will be passed to onCreate if the process is
-		// killed and restarted.
-		super.onSaveInstanceState(savedInstanceState);
-		Log.d(TAG, "onSaveInstanceState\n");
-	}
-
-	// Called at the end of the active lifetime.
+	/*
+	 * Called at the end of the active lifetime. Suspend UI updates, threads, or
+	 * CPU intensive processes that don’t need to be updated when the Activity
+	 * isn’t the active foreground activity.
+	 */
 	@Override
 	public void onPause() {
-		// Suspend UI updates, threads, or CPU intensive processes
-		// that don’t need to be updated when the Activity isn’t
-		// the active foreground activity.
 		super.onPause();
 		Log.d(TAG, "onPause\n");
 	}
 
-	// Called at the end of the visible lifetime.
+	/*
+	 * Called at the end of the visible lifetime. Suspend remaining UI updates,
+	 * threads, or processing that aren’t required when the Activity isn’t
+	 * visible. Persist all edits or state changes as after this call the
+	 * process is likely to be killed. (non-Javadoc)
+	 * 
+	 * @see android.support.v4.app.FragmentActivity#onStop()
+	 */
 	@Override
 	public void onStop() {
-		// Suspend remaining UI updates, threads, or processing
-		// that aren’t required when the Activity isn’t visible.
-		// Persist all edits or state changes
-		// as after this call the process is likely to be killed.
 		super.onStop();
 		Log.d(TAG, "onStop\n");
 	}
 
-	// Called at the end of the full lifetime.
+	/*
+	 * Called before subsequent visible lifetimes for an activity process. Load
+	 * changes knowing that the activity has already been visible within this
+	 * process. Next call is onStart.
+	 */
+	@Override
+	public void onRestart() {
+		super.onRestart();
+		Log.d(TAG, "onRestart\n");
+	}
+
+	/*
+	 * Called to save UI state changes at the end of the active life cycle. Save
+	 * UI state changes to the savedInstanceState. (non-Javadoc)
+	 * 
+	 * @see
+	 * android.support.v4.app.FragmentActivity#onSaveInstanceState(android.os
+	 * .Bundle) This bundle will be passed to onCreate if the process is killed
+	 * and restarted. This is called just before the activity is destroyed.
+	 */
+	@Override
+	public void onSaveInstanceState(Bundle savedInstanceState) {
+		// Always call the superclass so it can save the view hierarchy state
+		super.onSaveInstanceState(savedInstanceState);
+		Log.d(TAG, "onSaveInstanceState\n");
+	}
+
+	/*
+	 * Called at the end of the full lifetime. Clean up any resources including
+	 * ending threads, closing database connections etc.
+	 */
 	@Override
 	public void onDestroy() {
-		// Clean up any resources including ending threads,
-		// closing database connections etc.
 		super.onDestroy();
 		Log.d(TAG, "onDestroy\n");
 	}
@@ -183,11 +250,24 @@ public class MySensors extends FragmentActivity {
 
 		// Reset rates...
 		case (R.id.reset):
-			// For each sensor, reset update rates to default
+			// For each sensor, reset settings to default
 			for (SensorListEntry se : sensorArray) {
 
-				// Reset sensor views to defaults
-				se.reset();
+				// Create a unique name for these setting
+				String name = SensorView.getName(getApplicationContext(),
+						se.getIndex());
+				SharedPreferences preferences = getSharedPreferences(name,
+						MODE_PRIVATE);
+
+				// Retrieve existing set of settings
+				SensorViewSettings settings = SensorViewSettings
+						.restore(preferences);
+
+				// Reset setting
+				settings.reset();
+
+				// Save settings
+				settings.save(preferences);
 			}
 
 			// Construct notification next
@@ -214,85 +294,81 @@ public class MySensors extends FragmentActivity {
 		return false;
 	}
 
+	// A helper function to find a sensor using the manager and an index
+	public final static Sensor findSensor(SensorManager mgr, int index) {
+		Sensor sensor;
+
+		// Find a sensor at this index...
+		try {
+			sensor = mgr.getSensorList(Sensor.TYPE_ALL).get(index);
+		} catch (IndexOutOfBoundsException e) {
+			// The entry is not available, throw exception
+			throw new IndexOutOfBoundsException(TAG
+					+ ": cannot get sensor at index." + String.valueOf(index));
+		}
+
+		return sensor;
+	}
+
 	// A helper function to determine if a sensor is in our list
 	private boolean sensorExists(final Sensor sensor) {
 		boolean exists = false;
 		for (SensorListEntry sensorItem : sensorArray) {
-			exists = sensor == sensorItem.getSensor();
-			if (exists == true)
+			exists = (sensor == sensorItem.getSensor());
+			if (exists == true) {
 				break;
+			}
 		}
+
 		return exists;
 	}
 
-	// A helper function to load each sensor
+	// A helper function to load each sensor into the list
 	private void loadSensors() {
 
-		// Get references to UI widget (ListView) for sensors
-		ListView sensorListView = (ListView) findViewById(R.id.sensors);
+		// Acquire sensor manager
+		final SensorManager mgr = (SensorManager) getSystemService(SENSOR_SERVICE);
 
-		// Create a Sensor adapter to bind the array to the list view
-		final SensorAdapter sa;
-		sa = new SensorAdapter(this, R.layout.sensor_item, sensorArray);
-
-		// Bind array adaptor to the ListView
-		sensorListView.setAdapter(sa);
+		// Iterate over available sensors...
+		int sensor_index = 0;
 
 		// Load array with each sensor available
 		for (Sensor sensor : mgr.getSensorList(Sensor.TYPE_ALL)) {
 
-			boolean exists = false;
+			boolean exists;
+
+			// Create some textual info for the log about this sensor
+			String text = String.format(getString(R.string.sensor_log),
+					sensor_index, SensorInterface.getType(sensor.getType()),
+					sensor.hashCode(), sensor.toString());
 
 			// Does this sensor exist in our list?
 			exists = sensorExists(sensor);
 
 			// Sensor does not exist, add it
 			if (exists == false) {
-				SensorListEntry sensorItem = new SensorListEntry(sensor);
+
+				// Create a new sensor list element
+				SensorListEntry sensor_entry = new SensorListEntry(mgr,
+						sensor_index);
 
 				// Add this sensor to our list of sensors
-				sensorArray.add(sensorItem);
+				sensorArray.add(sensor_entry);
 
-				// Write some info to the log about this sensor
-				String text = String.format(getString(R.string.sensor_log),
-						SensorInterface.getType(sensor.getType()),
-						sensor.getName(), sensor.getVendor(),
-						sensor.getVersion());
-				Log.d(TAG, text);
+				text += "Added";
+
+			} else {
+
+				text += "Exists(Skipped)";
 			}
+
+			// Write sensor text to the log
+			Log.d(TAG, text);
+
+			// Increment sensor index
+			sensor_index++;
 		}
-
-		// Load number of sensors
-		TextView tv = (TextView) findViewById(R.id.number_of_sensors_found_value);
-		if (tv != null) {
-			Integer numSensors = sensorArray.size();
-			tv.setText(numSensors.toString());
-		}
-
-		// Notifies the attached View that the underlying data has been
-		// changed and it should refresh itself.
-		sa.notifyDataSetChanged();
-
-		// Set a listener to respond to list item clicks
-		sensorListView.setOnItemClickListener(new OnItemClickListener() {
-			public void onItemClick(AdapterView<?> parent, View view,
-					int position, long id) {
-				// Launch a new Activity to display the selected sensor
-				Intent intent = new Intent(MySensors.this, SensorView.class);
-				// Push the sensor position to the new Activity
-				intent.putExtra("SensorPosition", position);
-				// Start the activity
-				startActivity(intent);
-			}
-		});
 
 		return;
-	}
-
-	/**
-	 * @return the sensorArray(position)
-	 */
-	public static SensorListEntry getSensorAt(int position) {
-		return sensorArray.get(position);
 	}
 }

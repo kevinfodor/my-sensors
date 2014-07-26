@@ -43,7 +43,8 @@ public class SensorAdapter extends ArrayAdapter<SensorListEntry> {
 			// Populate sensor's icon
 			ImageView iv = (ImageView) v.findViewById(R.id.sensor_icon);
 			if (iv != null) {
-				iv.setImageResource(SensorInterface.getIcon(sensor.getType()));
+				int sensor_type = sensor.getType();
+				iv.setImageResource(SensorInterface.getIcon(sensor_type));
 			}
 			// Populate sensor's name
 			TextView tv = (TextView) v.findViewById(R.id.sensor_name);
