@@ -27,11 +27,35 @@ public class SensorViewSettings {
 	private int orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 	private static final String SENSOR_ORIENTATION_TAG = "orientation";
 
+	// Logging of sensor data
+	private boolean log_data = false;
+	private static final String SENSOR_LOG_DATA_TAG = "logging";
+
 	// Create with explicit values
 	SensorViewSettings(int rate, boolean show_all_values, int orientation) {
 		this.rate = rate;
 		this.show_all_values = show_all_values;
 		this.orientation = orientation;
+	}
+
+	// Create with preference values
+	SensorViewSettings(SharedPreferences preferences) {
+
+		// Note this is where default settings are also established
+		this.rate = preferences.getInt(SENSOR_RATE_TAG,
+				SensorManager.SENSOR_DELAY_NORMAL);
+		this.show_all_values = preferences.getBoolean(
+				SENSOR_SHOW_ALL_VALUES_TAG, false);
+		this.orientation = preferences.getInt(SENSOR_ORIENTATION_TAG,
+				ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+		this.log_data = preferences.getBoolean(SENSOR_LOG_DATA_TAG, false);
+
+		// Write some info to the log about this restore
+		String text = String
+				.format("Restored settings; rate=%s, show_all_values=%B, orientation=%d, log_data=%B",
+						SensorInterface.delayToString(rate), show_all_values,
+						orientation, log_data);
+		Log.d(TAG, text);
 	}
 
 	// Reset all settings to defaults
@@ -40,6 +64,7 @@ public class SensorViewSettings {
 		rate = SensorManager.SENSOR_DELAY_NORMAL;
 		show_all_values = false;
 		orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+		log_data = false;
 	}
 
 	public int getRate() {
@@ -52,6 +77,10 @@ public class SensorViewSettings {
 
 	public int getOrientation() {
 		return orientation;
+	}
+
+	public boolean getLogData() {
+		return log_data;
 	}
 
 	public void setRate(int rate) {
@@ -81,28 +110,13 @@ public class SensorViewSettings {
 		Log.d(TAG, text);
 	}
 
-	public static SensorViewSettings restore(SharedPreferences preferences) {
+	public void setLogData(boolean log_data) {
+		this.log_data = log_data;
 
-		// Note this is where default settings are also established
-		int rate = preferences.getInt(SENSOR_RATE_TAG,
-				SensorManager.SENSOR_DELAY_NORMAL);
-		boolean show_all_values = preferences.getBoolean(
-				SENSOR_SHOW_ALL_VALUES_TAG, false);
-		int orientation = preferences.getInt(SENSOR_ORIENTATION_TAG,
-				ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-
-		SensorViewSettings obj = new SensorViewSettings(rate, show_all_values,
-				orientation);
-
-		// Write some info to the log about this restore
-		String text = String
-				.format("Restored settings; rate=%s, show_all_values=%B, orientation=%d",
-						SensorInterface.delayToString(rate), show_all_values,
-						orientation);
+		// Write some info to the log about this change
+		String text = String.format("Setting 'log_data' changed to %B",
+				this.log_data);
 		Log.d(TAG, text);
-
-		return obj;
-
 	}
 
 	public void save(SharedPreferences preferences) {
@@ -114,12 +128,13 @@ public class SensorViewSettings {
 		editor.putInt(SENSOR_RATE_TAG, rate);
 		editor.putBoolean(SENSOR_SHOW_ALL_VALUES_TAG, show_all_values);
 		editor.putInt(SENSOR_ORIENTATION_TAG, orientation);
+		editor.putBoolean(SENSOR_LOG_DATA_TAG, log_data);
 
 		// Write some info to the log about this save
-		String text = String.format(
-				"Saved settings; rate=%s, show_all_values=%B, orientation=%d",
-				SensorInterface.delayToString(rate), show_all_values,
-				orientation);
+		String text = String
+				.format("Saved settings; rate=%s, show_all_values=%B, orientation=%d, log_data=%B",
+						SensorInterface.delayToString(rate), show_all_values,
+						orientation, log_data);
 		Log.d(TAG, text);
 
 		// Commit to storage

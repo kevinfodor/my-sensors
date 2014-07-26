@@ -114,7 +114,7 @@ public class SensorView extends FragmentActivity implements
 
 		// Restore settings
 		preferences = getSharedPreferences(settings_name, MODE_PRIVATE);
-		settings = SensorViewSettings.restore(preferences);
+		settings = new SensorViewSettings(preferences);
 
 		// Initialize the sensor we are using
 		initSensor(index);
@@ -298,9 +298,13 @@ public class SensorView extends FragmentActivity implements
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		super.onPrepareOptionsMenu(menu);
 
+		Boolean checked;
+
 		// Get state of menu options
-		Boolean checked = settings.getShowAllValues();
+		checked = settings.getShowAllValues();
 		menu.findItem(R.id.show_all_values).setChecked(checked);
+		checked = settings.getLogData();
+		menu.findItem(R.id.log_data).setChecked(checked);
 		return true;
 	}
 
@@ -356,6 +360,19 @@ public class SensorView extends FragmentActivity implements
 
 			// Update number of shown values
 			updateShownValues();
+
+			return true; // handled
+		}
+		// Log data...
+		case (R.id.log_data): {
+
+			// Toggle current 'log' state
+			Boolean log_data = settings.getLogData();
+			log_data = !log_data;
+			settings.setLogData(log_data);
+
+			// Handle check/unchecked setting.
+			item.setChecked(log_data);
 
 			return true; // handled
 		}
@@ -461,7 +478,9 @@ public class SensorView extends FragmentActivity implements
 				}
 
 				// write sensor info about this event's data
-				writeSensorData(i, event);
+				if (settings.getLogData() == true) {
+					writeSensorData(i, event);
+				}
 			}
 		}
 	}

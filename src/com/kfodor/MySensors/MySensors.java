@@ -260,8 +260,8 @@ public class MySensors extends FragmentActivity {
 						MODE_PRIVATE);
 
 				// Retrieve existing set of settings
-				SensorViewSettings settings = SensorViewSettings
-						.restore(preferences);
+				SensorViewSettings settings = new SensorViewSettings(
+						preferences);
 
 				// Reset setting
 				settings.reset();

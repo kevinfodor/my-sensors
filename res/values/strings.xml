@@ -51,6 +51,7 @@
     <string name="sensor_num_values_known_tag">"Number of values known: "</string>
     <string name="sensor_num_values_tag">"Number of values shown: "</string>
     <string name="show_all_values_tag">Show All Values</string>
+    <string name="log_data_tag">Log data</string>
     <string name="sensor_search_url">"http://www.google.com/search?hl=en&amp;q=%1$s+%2$s+%3$s&amp;btnG=Search&amp;aq=f&amp;aqi=&amp;aql=&amp;oq=&amp;gs_rfai="</string>
     <string name="sensor_values_shown_separator_tag">of</string>
     <string name="rotate_screen_tag">Rotate Screen</string>
