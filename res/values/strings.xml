@@ -4,7 +4,7 @@
     <string name="empty">No sensors!</string>
     <string name="app_name">My Sensors</string>
     <string name="app_author">Kevin Fodor</string>
-    <string name="app_version">v1.3beta</string>
+    <string name="app_version">v1.3beta2</string>
     <string name="app_about_text">This application is a very simple utility
     which allows you to explore each sensor available on an Android device.
     This is mainly intended to be an instructional and experimental application
@@ -35,13 +35,12 @@
     <string name="zero_tag">0</string>
     <string name="milliamp_tag">mA</string>
     <string name="units_tag">units</string>
-    <string name="change_event_update_rate_tag">Change Event Update Rate</string>
     <string name="change_event_update_rate_menu_tag">Change Rate</string>
     <string name="search_web_tag">&quot;Search Web&#8230;&quot;</string>
     <string name="sensor_details_tag">Sensor Details</string>
     <string name="real_time_data_tag">Real-Time Data</string>
     <string name="reset_sensor_view_menu_tag">Reset Sensor View</string>
-    <string name="reset_all_sensor_views_menu_tag">Reset Sensor Views</string>
+    <string name="reset_all_sensor_views_menu_tag">Reset ALL Sensor Views</string>
     <string name="reset_all_sensor_views_to_defaults_tag">All sensor views RESET to defaults</string>
     <string name="rate_change_choice_tag">Choose an event update rate:</string>
     <string name="no_data_tag">No data!</string>
@@ -55,5 +54,8 @@
     <string name="sensor_search_url">"http://www.google.com/search?hl=en&amp;q=%1$s+%2$s+%3$s&amp;btnG=Search&amp;aq=f&amp;aqi=&amp;aql=&amp;oq=&amp;gs_rfai="</string>
     <string name="sensor_values_shown_separator_tag">of</string>
     <string name="rotate_screen_tag">Rotate Screen</string>
+    <string name="reset_events_tag">Reset Counter</string>
+    <string name="start_events_tag">Start</string>
+    <string name="stop_events_tag">Stop</string>
         
 </resources>

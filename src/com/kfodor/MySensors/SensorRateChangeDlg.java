@@ -48,6 +48,7 @@ public class SensorRateChangeDlg extends DialogFragment implements
 		// Retrieve the current rate setting.
 		int delay = mListener.getRate();
 
+		// Creat a list of rate choices from the text array
 		ListAdapter delay_choices = new SparseArrayAdaptor<String>(context,
 				SensorInterface.delay);
 

@@ -1,5 +1,7 @@
 package com.kfodor.MySensors;
 
+import java.util.Locale;
+
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.hardware.SensorManager;
@@ -52,7 +54,8 @@ public class SensorViewSettings {
 
 		// Write some info to the log about this restore
 		String text = String
-				.format("Restored settings; rate=%s, show_all_values=%B, orientation=%d, log_data=%B",
+				.format(Locale.US,
+						"Restored settings; rate=%s, show_all_values=%B, orientation=%d, log_data=%B",
 						SensorInterface.delayToString(rate), show_all_values,
 						orientation, log_data);
 		Log.d(TAG, text);
@@ -87,7 +90,7 @@ public class SensorViewSettings {
 		this.rate = rate;
 
 		// Write some info to the log about this change
-		String text = String.format("Setting 'rate' changed to %s",
+		String text = String.format(Locale.US, "Setting 'rate' changed to %s",
 				SensorInterface.delayToString(rate));
 		Log.d(TAG, text);
 	}
@@ -96,8 +99,8 @@ public class SensorViewSettings {
 		this.show_all_values = show_all_values;
 
 		// Write some info to the log about this change
-		String text = String.format("Setting 'show-all' changed to %B",
-				this.show_all_values);
+		String text = String.format(Locale.US,
+				"Setting 'show-all' changed to %B", this.show_all_values);
 		Log.d(TAG, text);
 	}
 
@@ -105,8 +108,8 @@ public class SensorViewSettings {
 		this.orientation = orientation;
 
 		// Write some info to the log about this change
-		String text = String.format("Setting 'orientation' changed to %d",
-				this.orientation);
+		String text = String.format(Locale.US,
+				"Setting 'orientation' changed to %d", this.orientation);
 		Log.d(TAG, text);
 	}
 
@@ -114,8 +117,8 @@ public class SensorViewSettings {
 		this.log_data = log_data;
 
 		// Write some info to the log about this change
-		String text = String.format("Setting 'log_data' changed to %B",
-				this.log_data);
+		String text = String.format(Locale.US,
+				"Setting 'log_data' changed to %B", this.log_data);
 		Log.d(TAG, text);
 	}
 
@@ -132,7 +135,8 @@ public class SensorViewSettings {
 
 		// Write some info to the log about this save
 		String text = String
-				.format("Saved settings; rate=%s, show_all_values=%B, orientation=%d, log_data=%B",
+				.format(Locale.US,
+						"Saved settings; rate=%s, show_all_values=%B, orientation=%d, log_data=%B",
 						SensorInterface.delayToString(rate), show_all_values,
 						orientation, log_data);
 		Log.d(TAG, text);

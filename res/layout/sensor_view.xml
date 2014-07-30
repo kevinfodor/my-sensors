@@ -3,394 +3,426 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/sensor_scroll_view"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
-<RelativeLayout 
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    tools:context=".SensorView" >
+    android:layout_height="fill_parent" >
 
-    <TextView
-        android:id="@+id/sensor_details"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_below="@+id/sensor_details"
-        android:layout_centerHorizontal="true"
-        android:layout_centerInParent="true"
-        android:layout_centerVertical="false"
-        android:text="@string/sensor_details_tag"
-        android:textSize="24sp"
-        android:textStyle="bold" />
-
-    <TextView
-        android:id="@+id/line"
-        android:layout_width="fill_parent"
-        android:layout_height="6dip"
-        android:layout_below="@+id/sensor_details"
-        android:layout_marginBottom="6dip"
-        android:background="@color/green" />
-
-    <ImageView
-        android:id="@+id/sensor_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/line"
-        android:contentDescription="@string/empty"
-        android:paddingBottom="6dip"
-        android:paddingRight="6dip"
-        android:paddingTop="6dip"
-        android:src="@drawable/unknown_sensor" />
-
-    <LinearLayout
-        android:id="@+id/sensor_name_layout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/sensor_icon"
-        android:layout_toRightOf="@+id/sensor_icon" >
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/sensor_name_tag"
-            android:textColor="@color/sensor_attributes" />
-
-        <TextView
-            android:id="@+id/sensor_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/unknown_tag" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/sensor_vendor_layout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/sensor_name_layout"
-        android:layout_toRightOf="@+id/sensor_icon" >
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/sensor_vendor_tag"
-            android:textColor="@color/sensor_attributes" />
-
-        <TextView
-            android:id="@+id/sensor_vendor"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/unknown_tag" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/sensor_version_layout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/sensor_vendor_layout"
-        android:layout_toRightOf="@+id/sensor_icon" >
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/sensor_version_tag"
-            android:textColor="@color/sensor_attributes" />
-
-        <TextView
-            android:id="@+id/sensor_version"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/unknown_tag" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/sensor_type_layout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/sensor_version_layout"
-        android:layout_toRightOf="@+id/sensor_icon" >
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/sensor_type_tag"
-            android:textColor="@color/sensor_attributes" />
-
-        <TextView
-            android:id="@+id/sensor_type"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/unknown_tag" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/sensor_power_layout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/sensor_type_layout"
-        android:layout_toRightOf="@+id/sensor_icon" >
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/sensor_power_tag"
-            android:textColor="@color/sensor_attributes" />
-
-        <TextView
-            android:id="@+id/sensor_power"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/zero_dot_zero" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="6dip"
-            android:text="@string/milliamp_tag" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/sensor_range_layout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/sensor_power_layout"
-        android:layout_toRightOf="@+id/sensor_icon" >
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/sensor_range_tag"
-            android:textColor="@color/sensor_attributes" />
-
-        <TextView
-            android:id="@+id/sensor_range"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/zero_dot_zero" />
-
-        <TextView
-            android:id="@+id/sensor_range_units"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="6dip"
-            android:text="@string/units_tag" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/sensor_resolution_layout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/sensor_range_layout"
-        android:layout_toRightOf="@+id/sensor_icon" >
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/sensor_resolution_tag"
-            android:textColor="@color/sensor_attributes" />
-
-        <TextView
-            android:id="@+id/sensor_resolution"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/zero_dot_zero" />
-
-        <TextView
-            android:id="@+id/sensor_resolution_units"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="6dip"
-            android:text="@string/units_tag" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/sensor_num_values_layout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/sensor_resolution_layout"
-        android:layout_toRightOf="@+id/sensor_icon" >
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/sensor_num_values_known_tag"
-            android:textColor="@color/sensor_attributes" />
-
-        <TextView
-            android:id="@+id/sensor_num_values"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/zero_tag" />
-    </LinearLayout>
-
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/sensor_num_values_layout"
-        android:orientation="vertical" >
+        tools:context=".SensorView" >
 
-        <TextView
+        <RelativeLayout
+            android:id="@+id/static_data_layout"
             android:layout_width="fill_parent"
-            android:layout_height="2dip"
-            android:layout_marginBottom="6dip"
-            android:layout_marginTop="6dip"
-            android:background="@color/green"
-            android:paddingBottom="6dip"
-            android:paddingTop="6dip" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:text="@string/real_time_data_tag"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:typeface="normal" />
-
-        <TextView
-            android:layout_width="fill_parent"
-            android:layout_height="2dip"
-            android:layout_marginBottom="6dip"
-            android:layout_marginTop="6dip"
-            android:background="@color/green"
-            android:paddingBottom="6dip"
-            android:paddingTop="6dip" />
-
-        <LinearLayout
-            android:id="@+id/sensor_accuracy_layout"
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content" >
 
             <TextView
+                android:id="@+id/sensor_details"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/sensor_accuracy_tag"
-                android:textColor="@color/sensor_attributes" />
+                android:layout_alignParentTop="true"
+                android:layout_below="@+id/sensor_details"
+                android:layout_centerHorizontal="true"
+                android:layout_centerInParent="true"
+                android:layout_centerVertical="false"
+                android:text="@string/sensor_details_tag"
+                android:textSize="24sp"
+                android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/sensor_accuracy"
+                android:id="@+id/line"
+                android:layout_width="fill_parent"
+                android:layout_height="6dip"
+                android:layout_below="@+id/sensor_details"
+                android:layout_marginBottom="6dip"
+                android:background="@color/green" />
+
+            <ImageView
+                android:id="@+id/sensor_icon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/unknown_tag" />
-        </LinearLayout>
+                android:layout_below="@+id/line"
+                android:contentDescription="@string/empty"
+                android:paddingBottom="6dip"
+                android:paddingRight="6dip"
+                android:paddingTop="6dip"
+                android:src="@drawable/unknown_sensor" />
 
-        <LinearLayout
-            android:id="@+id/sensor_delay_layout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
-
-            <TextView
+            <LinearLayout
+                android:id="@+id/sensor_name_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/sensor_delay_tag"
-                android:textColor="@color/sensor_attributes" />
+                android:layout_alignTop="@+id/sensor_icon"
+                android:layout_toRightOf="@+id/sensor_icon" >
 
-            <TextView
-                android:id="@+id/sensor_delay"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/unknown_tag" />
-        </LinearLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/sensor_name_tag"
+                    android:textColor="@color/sensor_attributes" />
 
-        <LinearLayout
-            android:id="@+id/sensor_events_layout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/sensor_events_tag"
-                android:textColor="@color/sensor_attributes" />
-
-            <TextView
-                android:id="@+id/sensor_events"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/zero_tag" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/sensor_timestamp_layout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/sensor_timestamp_tag"
-                android:textColor="@color/sensor_attributes" />
-
-            <TextView
-                android:id="@+id/sensor_timestamp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/zero_tag" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/sensor_num_values_reported_layout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/sensor_num_values_tag"
-                android:textColor="@color/sensor_attributes" />
-
-            <TextView
-                android:id="@+id/sensor_num_values_shown"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingRight="3dp"
-                android:text="@string/zero_tag" />
-            
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/sensor_values_shown_separator_tag"
-                android:textColor="@color/sensor_attributes" />
-
-            <TextView
-                android:id="@+id/sensor_num_values_available"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingLeft="3dp"
-                android:text="@string/zero_tag" />
-
+                <TextView
+                    android:id="@+id/sensor_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/unknown_tag" />
             </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/known_data_values"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dip"
-            android:orientation="vertical" >
-        </LinearLayout>
+            <LinearLayout
+                android:id="@+id/sensor_vendor_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/sensor_name_layout"
+                android:layout_toRightOf="@+id/sensor_icon" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/sensor_vendor_tag"
+                    android:textColor="@color/sensor_attributes" />
+
+                <TextView
+                    android:id="@+id/sensor_vendor"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/unknown_tag" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/sensor_version_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/sensor_vendor_layout"
+                android:layout_toRightOf="@+id/sensor_icon" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/sensor_version_tag"
+                    android:textColor="@color/sensor_attributes" />
+
+                <TextView
+                    android:id="@+id/sensor_version"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/unknown_tag" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/sensor_type_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/sensor_version_layout"
+                android:layout_toRightOf="@+id/sensor_icon" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/sensor_type_tag"
+                    android:textColor="@color/sensor_attributes" />
+
+                <TextView
+                    android:id="@+id/sensor_type"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/unknown_tag" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/sensor_power_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/sensor_type_layout"
+                android:layout_toRightOf="@+id/sensor_icon" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/sensor_power_tag"
+                    android:textColor="@color/sensor_attributes" />
+
+                <TextView
+                    android:id="@+id/sensor_power"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/zero_dot_zero" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="6dip"
+                    android:text="@string/milliamp_tag" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/sensor_range_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/sensor_power_layout"
+                android:layout_toRightOf="@+id/sensor_icon" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/sensor_range_tag"
+                    android:textColor="@color/sensor_attributes" />
+
+                <TextView
+                    android:id="@+id/sensor_range"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/zero_dot_zero" />
+
+                <TextView
+                    android:id="@+id/sensor_range_units"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="6dip"
+                    android:text="@string/units_tag" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/sensor_resolution_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/sensor_range_layout"
+                android:layout_toRightOf="@+id/sensor_icon" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/sensor_resolution_tag"
+                    android:textColor="@color/sensor_attributes" />
+
+                <TextView
+                    android:id="@+id/sensor_resolution"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/zero_dot_zero" />
+
+                <TextView
+                    android:id="@+id/sensor_resolution_units"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="6dip"
+                    android:text="@string/units_tag" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/sensor_num_values_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/sensor_resolution_layout"
+                android:layout_toRightOf="@+id/sensor_icon" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/sensor_num_values_known_tag"
+                    android:textColor="@color/sensor_attributes" />
+
+                <TextView
+                    android:id="@+id/sensor_num_values"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/zero_tag" />
+            </LinearLayout>
+        </RelativeLayout>
 
         <LinearLayout
-            android:id="@+id/unknown_data_values"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" >
-        </LinearLayout>
-        
-        <TextView
+            android:id="@+id/real_time_data_layout"
             android:layout_width="fill_parent"
-            android:layout_height="2dip"
-            android:layout_marginBottom="6dip"
-            android:layout_marginTop="6dip"
-            android:background="@color/green"
-            android:paddingBottom="6dip"
-            android:paddingTop="6dip" />
-
-        <Button
-            android:id="@+id/RateButton"
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:text="@string/change_event_update_rate_tag" />
+            android:layout_below="@+id/static_data_layout"
+            android:orientation="vertical" >
 
-    </LinearLayout>
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="2dip"
+                android:layout_marginBottom="6dip"
+                android:layout_marginTop="6dip"
+                android:background="@color/green"
+                android:paddingBottom="6dip"
+                android:paddingTop="6dip" />
 
-</RelativeLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/real_time_data_tag"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:typeface="normal" />
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="2dip"
+                android:layout_marginBottom="6dip"
+                android:layout_marginTop="6dip"
+                android:background="@color/green"
+                android:paddingBottom="6dip"
+                android:paddingTop="6dip" />
+
+            <LinearLayout
+                android:id="@+id/sensor_accuracy_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/sensor_accuracy_tag"
+                    android:textColor="@color/sensor_attributes" />
+
+                <TextView
+                    android:id="@+id/sensor_accuracy"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/unknown_tag" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/sensor_delay_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/sensor_delay_tag"
+                    android:textColor="@color/sensor_attributes" />
+
+                <TextView
+                    android:id="@+id/sensor_delay"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/unknown_tag" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/sensor_events_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/sensor_events_tag"
+                    android:textColor="@color/sensor_attributes" />
+
+                <TextView
+                    android:id="@+id/sensor_events"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/zero_tag" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/sensor_timestamp_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/sensor_timestamp_tag"
+                    android:textColor="@color/sensor_attributes" />
+
+                <TextView
+                    android:id="@+id/sensor_timestamp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/zero_tag" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/sensor_num_values_reported_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/sensor_num_values_tag"
+                    android:textColor="@color/sensor_attributes" />
+
+                <TextView
+                    android:id="@+id/sensor_num_values_shown"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingRight="3dp"
+                    android:text="@string/zero_tag" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/sensor_values_shown_separator_tag"
+                    android:textColor="@color/sensor_attributes" />
+
+                <TextView
+                    android:id="@+id/sensor_num_values_available"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="3dp"
+                    android:text="@string/zero_tag" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/known_data_values"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dip"
+                android:orientation="vertical" >
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/unknown_data_values"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" >
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/buttons_layout"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/real_time_data_layout"
+            android:orientation="vertical" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="2dip"
+                android:layout_marginBottom="6dip"
+                android:layout_marginTop="6dip"
+                android:background="@color/green"
+                android:paddingBottom="6dip"
+                android:paddingTop="6dip" />
+
+            <LinearLayout
+                android:id="@+id/control_buttons"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" >
+
+                <ToggleButton
+                    android:id="@+id/start_stop_events_button"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    android:layout_weight="1"
+                    android:checked="true"
+                    android:textOn="@string/stop_events_tag"
+                    android:textOff="@string/start_events_tag" />
+
+                <Button
+                    android:id="@+id/reset_events_button"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:layout_weight="1"
+                    android:text="@string/reset_events_tag" />
+            </LinearLayout>
+        </LinearLayout>
+    </RelativeLayout>
+
 </ScrollView>

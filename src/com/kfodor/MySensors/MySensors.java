@@ -1,7 +1,7 @@
 package com.kfodor.MySensors;
 
 import java.util.ArrayList;
-
+import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.app.Dialog;
 import android.content.Intent;
@@ -37,6 +37,7 @@ public class MySensors extends FragmentActivity {
 	 * This method also provides you with a Bundle containing the activity's
 	 * previously frozen state, if there was one. Always followed by onStart().
 	 */
+	@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);

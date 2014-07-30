@@ -1,7 +1,9 @@
 package com.kfodor.MySensors;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
+import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.app.Dialog;
 import android.content.Context;
@@ -23,10 +25,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 
@@ -56,6 +61,9 @@ public class SensorView extends FragmentActivity implements
 	private TextView num_values_shown_view = null;
 	private ArrayList<TextView> data_value_views = new ArrayList<TextView>();
 
+	// Toggle button (start/stop)
+	private ToggleButton start_stop_toggle_button = null;
+
 	// This sensor view settings (persistent)
 	private SensorViewSettings settings = null;
 	SharedPreferences preferences = null;
@@ -73,6 +81,7 @@ public class SensorView extends FragmentActivity implements
 	 * This method also provides you with a Bundle containing the activity's
 	 * previously frozen state, if there was one. Always followed by onStart().
 	 */
+	@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -125,17 +134,8 @@ public class SensorView extends FragmentActivity implements
 		// Initialize real-time (dynamic) sensor view references
 		initRealTimeViews();
 
-		// Add a button listener to change the event update rate
-		final Button rb = (Button) findViewById(R.id.RateButton);
-		rb.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				// Perform action on clicks
-
-				// Create an instance of the dialog fragment and show it.
-				DialogFragment rate = new SensorRateChangeDlg();
-				rate.show(getSupportFragmentManager(), "rate");
-			}
-		});
+		// Initialize buttons
+		loadButtonViews();
 
 		// Fix issue #1 which will keep the screen from timing out
 		// or going off while viewing sensor data.
@@ -179,7 +179,8 @@ public class SensorView extends FragmentActivity implements
 		super.onResume();
 		Log.d(TAG, "onResume\n");
 
-		registerSensorListener(settings.getRate(), false);
+		// On resume, reapply settings
+		applySettings();
 	}
 
 	/*
@@ -192,8 +193,8 @@ public class SensorView extends FragmentActivity implements
 		super.onPause();
 		Log.d(TAG, "onPause\n");
 
-		// Unregister ourself from sensor stream
-		mgr.unregisterListener(this);
+		// Stop listening to sensor updates
+		unregisterSensorListener();
 	}
 
 	/*
@@ -380,6 +381,13 @@ public class SensorView extends FragmentActivity implements
 		case (R.id.reset): {
 
 			settings.reset();
+
+			// Reset event counter
+			event_counter = 0;
+
+			// Update event count text view with event data
+			event_count_view.setText(event_counter.toString());
+
 			applySettings();
 
 			return true; // handled
@@ -525,8 +533,8 @@ public class SensorView extends FragmentActivity implements
 		mgr = (SensorManager) getSystemService(SENSOR_SERVICE);
 		Sensor sensor = MySensors.findSensor(mgr, index);
 
-		String text = String.format("%s assigned, using sensor index: %d",
-				sensor.getName(), index);
+		String text = String.format(Locale.US,
+				"%s assigned, using sensor index: %d", sensor.getName(), index);
 		Log.d(TAG, text);
 
 		// Now that we have the sensor, create a sensor interface object
@@ -690,16 +698,42 @@ public class SensorView extends FragmentActivity implements
 		return;
 	}
 
+	// load button view information for quick reference in real-time
+	private void loadButtonViews() {
+		// Add a button listener to toggle the start/stop state
+		start_stop_toggle_button = (ToggleButton) findViewById(R.id.start_stop_events_button);
+		start_stop_toggle_button
+				.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+					@Override
+					public void onCheckedChanged(CompoundButton buttonView,
+							boolean isChecked) {
+						// Just re-apply all current settings
+						applySettings();
+					}
+				});
+
+		// Add a button listener to reset event counter
+		final Button reset_button = (Button) findViewById(R.id.reset_events_button);
+		reset_button.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				// Perform action on clicks, reset counter
+				event_counter = 0;
+
+				// Update event count text view with event data
+				event_count_view.setText(event_counter.toString());
+			}
+		});
+	}
+
 	// Helper functions to register and unregister a sensor listener
-	private void registerSensorListener(int r, boolean notify) {
+	private boolean registerSensorListener(int r, boolean notify) {
 
 		// Unregister anything which was previously registered
-		mgr.unregisterListener(SensorView.this);
+		mgr.unregisterListener(this);
 
 		// Register as a listener at the new set rate
 		boolean result = mgr.registerListener(this, si.getSensor(), r);
 		if (result == true) {
-			delay_view.setText(SensorInterface.delayToString(r));
 			if (notify == true) {
 				// Construct notification next
 				String notification_text = String.format(
@@ -711,7 +745,12 @@ public class SensorView extends FragmentActivity implements
 			}
 		}
 
-		return;
+		return result;
+	}
+
+	private void unregisterSensorListener() {
+		// Unregister ourself from sensor stream
+		mgr.unregisterListener(this);
 	}
 
 	// Provide the current sensor's rate setting this method is
@@ -728,9 +767,10 @@ public class SensorView extends FragmentActivity implements
 	public void onRateChange(int rate_picked) {
 		// User touched the dialog's positive button
 
-		// Register sensor listener at chosen rate
-		registerSensorListener(rate_picked, true);
+		// Remember setting at chosen rate
 		settings.setRate(rate_picked);
+		applySettings();
+
 		return;
 	}
 
@@ -760,9 +800,20 @@ public class SensorView extends FragmentActivity implements
 		updateShownValues();
 
 		// Request orientation based on settings
-		setRequestedOrientation(settings.getOrientation());
+		int orientation = settings.getOrientation();
+		setRequestedOrientation(orientation);
 
-		// Register sensor listener based on settings
-		registerSensorListener(settings.getRate(), false);
+		// Update text for displayed rate(delay)
+		int rate = settings.getRate();
+		delay_view.setText(SensorInterface.delayToString(rate));
+
+		// Check start/stop button state and take action
+		if (start_stop_toggle_button.isChecked() == true) {
+			// Register sensor listener based on settings
+			registerSensorListener(rate, false);
+		} else {
+			// Stop listening to sensor updates
+			unregisterSensorListener();
+		}
 	}
 }
