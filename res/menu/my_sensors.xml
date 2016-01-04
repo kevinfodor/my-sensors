@@ -10,10 +10,34 @@
         android:titleCondensed="@string/reset_all_sensor_views_menu_tag">
     </item>
     <item
+        android:id="@+id/rewrite"
+        android:alphabeticShortcut="w"
+        android:icon="@android:drawable/ic_menu_manage"
+        android:numericShortcut="1"
+        android:title="@string/rewrite_sensor_list_tag"
+        android:titleCondensed="@string/rewrite_sensor_list_tag">
+    </item>
+    <item
+        android:id="@+id/delete_all_sensor_log_files"
+        android:alphabeticShortcut="d"
+        android:icon="@android:drawable/ic_menu_delete"
+        android:numericShortcut="2"
+        android:title="@string/delete_all_sensor_logs_menu_tag"
+        android:titleCondensed="@string/delete_all_sensor_logs_menu_tag">
+    </item>
+    <item
+        android:id="@+id/show_log_files"
+        android:alphabeticShortcut="s"
+        android:icon="@android:drawable/ic_menu_upload"
+        android:numericShortcut="3"
+        android:title="@string/show_all_log_files_tag"
+        android:titleCondensed="@string/show_all_log_files_tag">
+    </item>
+    <item
         android:id="@+id/about"
         android:alphabeticShortcut="b"
         android:icon="@android:drawable/ic_menu_help"
-        android:numericShortcut="1"
+        android:numericShortcut="4"
         android:title="@string/about_tag"
         android:titleCondensed="@string/about_tag">
     </item>

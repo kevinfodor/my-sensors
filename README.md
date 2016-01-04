@@ -1,9 +1,18 @@
 This application is a very simple utility which allows you to explore each sensor available on an Android device. This is mainly intended to be an instructional and experimental application to help facilitate further exploration in application development using Android sensors. Each sensor is itemized in a list and when selected displays both informational and real-time data as well as the ability to search for more information on the selected sensor. Anyone is free to distribute, use and abuse this software as necessary. Enjoy!
 
-The latest release version of MySensors is on [Google Play](https://play.google.com/store/apps/details?id=com.kfodor.MySensors) (Version 1.3)
+The latest release version of MySensors is on [Google Play](https://play.google.com/store/apps/details?id=com.kfodor.MySensors) (Version 1.4)
 
-Downloads can be found here: [MySensors\_v1.3](https://drive.google.com/folderview?id=0B8_Aotc206N6em1uRzhyRVVncG8&usp=sharing)
+Downloads can be found here: [MySensors\_v1.4](https://drive.google.com/folderview?id=0B8_Aotc206N6SUFfMXAyRXNEX1k&usp=sharing)
 
+## Version 1.4 (Version Code=7) ##
+Download: [MySensors\_v1.4](https://drive.google.com/folderview?id=0B8_Aotc206N6SUFfMXAyRXNEX1k&usp=sharing)
+
+  * Supports Android SDK v4 thru v23
+  * Added sensor view logging [issue #9](https://code.google.com/p/my-sensors/issues/detail?id=#9) to a file which can be retrieved by a host PC through the device USB drive.
+  * Added the ability to log all found sensors to a file (MySensors.txt).
+  * Added the ability to view and delete all collected sensor view logs.
+  * Fixed [issue #10](https://code.google.com/p/my-sensors/issues/detail?id=#10) - Some screens using the sensor list where text as too large for the item.
+  
 ## Version 1.3 (Version Code=4) ##
 Download: [MySensors\_v1.3](https://drive.google.com/folderview?id=0B8_Aotc206N6em1uRzhyRVVncG8&usp=sharing)
 

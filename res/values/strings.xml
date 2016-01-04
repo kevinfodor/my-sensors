@@ -4,7 +4,7 @@
     <string name="empty">No sensors!</string>
     <string name="app_name">My Sensors</string>
     <string name="app_author">Kevin Fodor</string>
-    <string name="app_version">v1.3</string>
+    <string name="app_version">v1.4</string>
     <string name="app_about_text">This application is a very simple utility
     which allows you to explore each sensor available on an Android device.
     This is mainly intended to be an instructional and experimental application
@@ -40,8 +40,10 @@
     <string name="sensor_details_tag">Sensor Details</string>
     <string name="real_time_data_tag">Real-Time Data</string>
     <string name="reset_sensor_view_menu_tag">Reset Sensor View</string>
-    <string name="reset_all_sensor_views_menu_tag">Reset ALL Sensor Views</string>
+    <string name="reset_all_sensor_views_menu_tag">Reset All Sensor Views</string>
     <string name="reset_all_sensor_views_to_defaults_tag">All sensor views RESET to defaults</string>
+    <string name="delete_all_sensor_logs_menu_tag">Delete All Sensor Logs</string>
+    <string name="delete_all_sensor_logs_defaults_tag">All sensor logs have been deleted</string>
     <string name="rate_change_choice_tag">Choose an event update rate:</string>
     <string name="no_data_tag">No data!</string>
     <string name="sensor_rate_changed_tag">Changed event rate to %1$s</string>
@@ -50,12 +52,19 @@
     <string name="sensor_num_values_known_tag">"Number of values known: "</string>
     <string name="sensor_num_values_tag">"Number of values shown: "</string>
     <string name="show_all_values_tag">Show All Values</string>
-    <string name="log_data_tag">Log data</string>
+    <string name="log_data_tag">Log to ADB</string>
     <string name="sensor_search_url">"http://www.google.com/search?hl=en&amp;q=%1$s+%2$s+%3$s&amp;btnG=Search&amp;aq=f&amp;aqi=&amp;aql=&amp;oq=&amp;gs_rfai="</string>
     <string name="sensor_values_shown_separator_tag">of</string>
     <string name="rotate_screen_tag">Rotate Screen</string>
     <string name="reset_events_tag">Reset Counter</string>
-    <string name="start_events_tag">Start</string>
-    <string name="stop_events_tag">Stop</string>
-        
+    <string name="start_events_tag">Start Events</string>
+    <string name="stop_events_tag">Stop Events</string>
+    <string name="sensor_list_fname">MySensors.txt</string>
+    <string name="rewrite_sensor_list_tag">Rewrite Sensor List</string>
+    <string name="rewrite_sensor_list_notification_tag">Rewrote Sensor List File</string>
+    <string name="sensor_log_file_ext">csv</string>
+    <string name="start_logging_tag">Start Logging</string>
+    <string name="stop_logging_tag">Stop Logging</string>
+    <string name="show_all_log_files_tag">Show All Log Files</string>
+    
 </resources>

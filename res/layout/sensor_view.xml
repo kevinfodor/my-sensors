@@ -44,6 +44,7 @@
                 android:contentDescription="@string/empty"
                 android:paddingBottom="6dip"
                 android:paddingRight="6dip"
+                android:paddingLeft="6dip"
                 android:paddingTop="6dip"
                 android:src="@drawable/unknown_sensor" />
 
@@ -52,7 +53,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignTop="@+id/sensor_icon"
-                android:layout_toRightOf="@+id/sensor_icon" >
+                android:layout_toRightOf="@+id/sensor_icon"
+                android:layout_toEndOf="@+id/sensor_icon" >
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -72,7 +74,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/sensor_name_layout"
-                android:layout_toRightOf="@+id/sensor_icon" >
+                android:layout_toRightOf="@+id/sensor_icon"
+                android:layout_toEndOf="@+id/sensor_icon" >
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -92,7 +95,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/sensor_vendor_layout"
-                android:layout_toRightOf="@+id/sensor_icon" >
+                android:layout_toRightOf="@+id/sensor_icon"
+                android:layout_toEndOf="@+id/sensor_icon" >
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -112,7 +116,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/sensor_version_layout"
-                android:layout_toRightOf="@+id/sensor_icon" >
+                android:layout_toRightOf="@+id/sensor_icon"
+                android:layout_toEndOf="@+id/sensor_icon" >
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -132,7 +137,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/sensor_type_layout"
-                android:layout_toRightOf="@+id/sensor_icon" >
+                android:layout_toRightOf="@+id/sensor_icon"
+                android:layout_toEndOf="@+id/sensor_icon" >
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -149,6 +155,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="6dip"
                     android:layout_marginLeft="6dip"
                     android:text="@string/milliamp_tag" />
             </LinearLayout>
@@ -158,7 +165,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/sensor_power_layout"
-                android:layout_toRightOf="@+id/sensor_icon" >
+                android:layout_toRightOf="@+id/sensor_icon"
+                android:layout_toEndOf="@+id/sensor_icon"
+                 >
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -176,6 +185,7 @@
                     android:id="@+id/sensor_range_units"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="6dip"
                     android:layout_marginLeft="6dip"
                     android:text="@string/units_tag" />
             </LinearLayout>
@@ -185,7 +195,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/sensor_range_layout"
-                android:layout_toRightOf="@+id/sensor_icon" >
+                android:layout_toRightOf="@+id/sensor_icon"
+                android:layout_toEndOf="@+id/sensor_icon" >
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -203,6 +214,7 @@
                     android:id="@+id/sensor_resolution_units"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="6dip"
                     android:layout_marginLeft="6dip"
                     android:text="@string/units_tag" />
             </LinearLayout>
@@ -212,7 +224,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/sensor_resolution_layout"
-                android:layout_toRightOf="@+id/sensor_icon" >
+                android:layout_toRightOf="@+id/sensor_icon"
+                android:layout_toEndOf="@+id/sensor_icon" >
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -350,6 +363,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingRight="3dp"
+                    android:paddingLeft="3dp"
                     android:text="@string/zero_tag" />
 
                 <TextView
@@ -362,6 +376,7 @@
                     android:id="@+id/sensor_num_values_available"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:paddingRight="3dp"
                     android:paddingLeft="3dp"
                     android:text="@string/zero_tag" />
             </LinearLayout>
@@ -406,20 +421,29 @@
 
                 <ToggleButton
                     android:id="@+id/start_stop_events_button"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="left"
+                    android:layout_width="0dip"
+                    android:layout_height="fill_parent"
                     android:layout_weight="1"
+                    android:layout_gravity="end"
                     android:checked="true"
-                    android:textOn="@string/stop_events_tag"
-                    android:textOff="@string/start_events_tag" />
+                    android:textOff="@string/start_events_tag"
+                    android:textOn="@string/stop_events_tag" />
+
+                <ToggleButton
+                    android:id="@+id/start_stop_logging_button"
+                    android:layout_width="0dip"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="1"
+                    android:checked="false"
+                    android:textOff="@string/start_logging_tag"
+                    android:textOn="@string/stop_logging_tag" />
 
                 <Button
                     android:id="@+id/reset_events_button"
-                    android:layout_width="fill_parent"
+                    android:layout_width="0dip"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="right"
                     android:layout_weight="1"
+                    android:layout_gravity="end"
                     android:text="@string/reset_events_tag" />
             </LinearLayout>
         </LinearLayout>

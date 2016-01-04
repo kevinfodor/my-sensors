@@ -2,7 +2,6 @@ package com.kfodor.MySensors;
 
 import java.util.ArrayList;
 import java.util.Locale;
-
 import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.app.Dialog;
@@ -23,6 +22,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -64,6 +64,9 @@ public class SensorView extends FragmentActivity implements
 	// Toggle button (start/stop)
 	private ToggleButton start_stop_toggle_button = null;
 
+	// Toggle button (start/stop)
+	private ToggleButton start_stop_logging_button = null;
+
 	// This sensor view settings (persistent)
 	private SensorViewSettings settings = null;
 	SharedPreferences preferences = null;
@@ -74,6 +77,9 @@ public class SensorView extends FragmentActivity implements
 
 	// Sensor number of available values
 	private Integer num_available_values = 0;
+
+	// Sensor Logger object
+	private SensorLogger logger = null;
 
 	/*
 	 * Called when the activity is first created. This is where you should do
@@ -93,7 +99,7 @@ public class SensorView extends FragmentActivity implements
 		setContentView(R.layout.sensor_view);
 
 		// Make sure we're running on Honeycomb or higher to use ActionBar APIs
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 			// For the main activity, make sure the app icon in the action bar
 			// does not behave as a button
 			ActionBar actionBar = getActionBar();
@@ -144,8 +150,22 @@ public class SensorView extends FragmentActivity implements
 		// Prevent rotation of the screen, due to sensor changes
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
 
+		// Create a file logger for this sensor
+		if (logger == null) {
+			String dir = MySensors.getStoragePath(this);
+			String prefix = String.format(Locale.US, "MySensors_%d", index + 1);
+			logger = new SensorLogger(dir, prefix,
+					getString(R.string.sensor_log_file_ext), si);
+		}
+
 		// Apply settings
 		applySettings();
+	}
+
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		onCreate(savedInstanceState);
+		return container;
 	}
 
 	/*
@@ -179,7 +199,7 @@ public class SensorView extends FragmentActivity implements
 		super.onResume();
 		Log.d(TAG, "onResume\n");
 
-		// On resume, reapply settings
+		// On resume, re-apply settings
 		applySettings();
 	}
 
@@ -304,8 +324,10 @@ public class SensorView extends FragmentActivity implements
 		// Get state of menu options
 		checked = settings.getShowAllValues();
 		menu.findItem(R.id.show_all_values).setChecked(checked);
+
 		checked = settings.getLogData();
 		menu.findItem(R.id.log_data).setChecked(checked);
+
 		return true;
 	}
 
@@ -370,6 +392,8 @@ public class SensorView extends FragmentActivity implements
 			// Toggle current 'log' state
 			Boolean log_data = settings.getLogData();
 			log_data = !log_data;
+
+			// Record new setting
 			settings.setLogData(log_data);
 
 			// Handle check/unchecked setting.
@@ -486,10 +510,11 @@ public class SensorView extends FragmentActivity implements
 				}
 
 				// write sensor info about this event's data
-				if (settings.getLogData() == true) {
-					writeSensorData(i, event);
-				}
+				writeSensorData(i, event);
 			}
+
+			// Log information about this sensor
+			logger.write(event);
 		}
 	}
 
@@ -534,7 +559,8 @@ public class SensorView extends FragmentActivity implements
 		Sensor sensor = MySensors.findSensor(mgr, index);
 
 		String text = String.format(Locale.US,
-				"%s assigned, using sensor index: %d", sensor.getName(), index);
+				"%s assigned, using sensor index: %d", sensor.getName(),
+				index + 1);
 		Log.d(TAG, text);
 
 		// Now that we have the sensor, create a sensor interface object
@@ -542,7 +568,7 @@ public class SensorView extends FragmentActivity implements
 		si = new SensorInterface(sensor);
 
 		// Write some info to the log about this sensor
-		writeSensorInfo(index);
+		writeSensorInfo(index + 1);
 
 		return;
 	}
@@ -712,6 +738,18 @@ public class SensorView extends FragmentActivity implements
 					}
 				});
 
+		// Add a button listener to toggle the start/stop logging
+		start_stop_logging_button = (ToggleButton) findViewById(R.id.start_stop_logging_button);
+		start_stop_logging_button
+				.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+					@Override
+					public void onCheckedChanged(CompoundButton buttonView,
+							boolean isChecked) {
+						// Just re-apply all current settings
+						applySettings();
+					}
+				});
+
 		// Add a button listener to reset event counter
 		final Button reset_button = (Button) findViewById(R.id.reset_events_button);
 		reset_button.setOnClickListener(new View.OnClickListener() {
@@ -785,12 +823,16 @@ public class SensorView extends FragmentActivity implements
 
 	// Simple write member function to dump sensor data
 	private void writeSensorData(int i, SensorEvent event) {
-		// Write some info to the log about this sensor
-		String text = String.format(getString(R.string.sensor_data_format), i);
-		text += String.format(getString(R.string.sensor_value_format),
-				si.getLabel(i), si.getUnits());
-		text += String.valueOf(event.values[i]) + "\n";
-		Log.d(TAG, text);
+		// Check if logging has been enabled
+		if (settings.getLogData() == true) {
+			// Write some info to the log about this sensor
+			String text = String.format(getString(R.string.sensor_data_format),
+					i);
+			text += String.format(getString(R.string.sensor_value_format),
+					si.getLabel(i), si.getUnits());
+			text += String.valueOf(event.values[i]) + "\n";
+			Log.d(TAG, text);
+		}
 	}
 
 	// Helper function to apply current settings
@@ -814,6 +856,15 @@ public class SensorView extends FragmentActivity implements
 		} else {
 			// Stop listening to sensor updates
 			unregisterSensorListener();
+		}
+
+		// Check start/stop logging button state and take action
+		if (start_stop_logging_button.isChecked() == true) {
+			// Start logging
+			logger.enable(true);
+		} else {
+			// Stop logging
+			logger.enable(false);
 		}
 	}
 }

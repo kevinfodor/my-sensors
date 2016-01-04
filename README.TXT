@@ -1,3 +1,15 @@
+Version 1.4-beta2 (Version Code=6)
+============================
+  * Supports Android SDK versions v4 through v23
+  * Bug Fixed (#10) - Some screens using the sensor list where text as too large for the item.
+
+Version 1.4-beta (Version Code=5)
+============================
+  * Supports Android SDK versions v4 through v23
+  * Added sensor view logging (#9) to a file which can be retrieved by a host PC through the device USB drive.
+  * Added the ability to log all found sensors to a file (MySensors.txt).
+  * Added the ability to view and delete all collected sensor view logs.
+
 Version 1.3 (Version Code=4)
 ============================
   * Bug Fixed (#3) - Sensor List Memory Leak

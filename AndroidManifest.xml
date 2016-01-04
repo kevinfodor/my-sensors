@@ -1,19 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.kfodor.MySensors"
-    android:versionCode="4"
+    android:versionCode="7"
     android:versionName="@string/app_version" >
 
     <uses-sdk
         android:minSdkVersion="4"
-        android:targetSdkVersion="20" >
+        android:targetSdkVersion="23" >
     </uses-sdk>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"></uses-permission>
 
     <application
         android:allowBackup="true"
         android:description="@string/app_about_text"
         android:icon="@drawable/title_icon"
-        android:label="@string/app_name" >
+        android:label="@string/app_name">
         <activity
             android:name=".MySensors"
             android:label="@string/app_name" >

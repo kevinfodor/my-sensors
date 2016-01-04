@@ -1,3 +1,23 @@
+==Version 1.4 (Version Code=7)==
+Download: [https://drive.google.com/folderview?id=0B8_Aotc206N6SUFfMXAyRXNEX1k&usp=sharing]
+
+  * Supports Android SDK v4 thru v23
+  * Wrap up release of v1.4beta and v1.4beta releases.
+
+==Version 1.4-beta2 (Version Code=6)==
+Download: [https://drive.google.com/folderview?id=0B8_Aotc206N6em1uRzhyRVVncG8&usp=sharing MySensors_v1.4_beta2]
+
+  * Supports Android SDK versions v4 through v23
+  * Bug Fixed (#10) - Some screens using the sensor list where text as too large for the item.
+
+==Version 1.4-beta (Version Code=5)==
+Download: [https://drive.google.com/folderview?id=0B8_Aotc206N6em1uRzhyRVVncG8&usp=sharing MySensors_v1.4_beta]
+
+  * Supports Android SDK v4 thru v23
+  * Added sensor view logging (#9) to a file which can be retrieved by a host PC through the device USB drive.
+  * Added the ability to log all found sensors to a file (MySensors.txt).
+  * Added the ability to view and delete all collected sensor view logs.
+
 ==Version 1.3 (Version Code=4)==
 Download: [https://drive.google.com/folderview?id=0B8_Aotc206N6em1uRzhyRVVncG8&usp=sharing MySensors_v1.3]
 
