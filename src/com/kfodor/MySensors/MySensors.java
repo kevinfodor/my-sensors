@@ -1,6 +1,14 @@
 package com.kfodor.MySensors;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+
 import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.app.Dialog;
@@ -10,6 +18,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -58,6 +67,11 @@ public class MySensors extends FragmentActivity {
 
 		// Load all available sensors
 		loadSensors();
+
+		// Write text file with sensor list if not present
+		if (hasSensorListFile() == false) {
+			createSensorListFile();
+		}
 	}
 
 	/*
@@ -250,7 +264,7 @@ public class MySensors extends FragmentActivity {
 		switch (id) {
 
 		// Reset rates...
-		case (R.id.reset):
+		case (R.id.reset): {
 			// For each sensor, reset settings to default
 			for (SensorListEntry se : sensorArray) {
 
@@ -279,9 +293,45 @@ public class MySensors extends FragmentActivity {
 					.show();
 
 			return true; // Handled menu item
+		}
 
-			// About...
-		case (R.id.about):
+		// Rewrite Sensor List
+		case (R.id.rewrite): {
+			// Delete the existing file (if any)
+			deleteSensorListFile();
+
+			// Create a new file
+			createSensorListFile();
+
+			// Construct notification next
+			String text = String
+					.format(getString(R.string.rewrite_sensor_list_notification_tag));
+			// Show notification
+			Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT)
+					.show();
+
+			return true;
+		}
+
+		// Delete all Sensor Logs
+		case (R.id.delete_all_sensor_log_files): {
+
+			// Delete a log files
+			SensorLogger.deleteAllLogFiles(getExternalFilesDir(null).getPath(),
+					getString(R.string.sensor_log_file_ext));
+
+			// Construct notification next
+			String text = String
+					.format(getString(R.string.delete_all_sensor_logs_defaults_tag));
+			// Show notification
+			Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT)
+					.show();
+
+			return true;
+		}
+
+		// About...
+		case (R.id.about): {
 			// ... Perform menu handler actions ...
 
 			// Create an instance of the dialog fragment and show it.
@@ -291,6 +341,7 @@ public class MySensors extends FragmentActivity {
 			return true; // Handled menu item
 		}
 
+		}
 		// Return false if you have not handled the menu item.
 		return false;
 	}
@@ -371,5 +422,127 @@ public class MySensors extends FragmentActivity {
 		}
 
 		return;
+	}
+
+	/*
+	 * This is a simple method which creates a sensor list file on the device
+	 * that contains a complete list of all sensors along with the device name
+	 * and date the list was created.
+	 */
+	private void createSensorListFile() {
+
+		// Check if external storage is available
+		if (Environment.getExternalStorageState().equals(
+				Environment.MEDIA_MOUNTED)) {
+			// Create a path where we will place our private file on external
+			// storage.
+			File file = new File(getExternalFilesDir(null),
+					getString(R.string.sensor_list_fname));
+
+			try {
+				file.setReadable(true, false);
+				OutputStream os = new FileOutputStream(file);
+				if (os != null) {
+					OutputStreamWriter osw = new OutputStreamWriter(os);
+
+					if (os != null) {
+						// Write app info
+						osw.write(getString(R.string.app_name) + " "
+								+ getString(R.string.app_version));
+						osw.write(System.getProperty("line.separator"));
+						// Write device model and date
+						SimpleDateFormat df = new SimpleDateFormat(
+								"EEE, d MMM yyyy HH:mm:ss Z");
+						String date = df.format(Calendar.getInstance()
+								.getTime());
+						osw.write("Device: " + getDeviceInfo());
+						osw.write(System.getProperty("line.separator"));
+						String version = System.getProperty("os.version") + "("
+								+ android.os.Build.VERSION.INCREMENTAL + ")";
+						osw.write("Version: " + version);
+						osw.write(System.getProperty("line.separator"));
+						osw.write("Date: " + date);
+						osw.write(System.getProperty("line.separator"));
+						// Write sensor list
+						for (SensorListEntry sensorItem : sensorArray) {
+							Sensor sensor = sensorItem.getSensor();
+							String text = String.format(
+									getString(R.string.sensor_log),
+									sensorItem.getIndex() + 1,
+									SensorInterface.getType(sensor.getType()),
+									sensor.hashCode(), sensor.toString());
+							osw.write(text);
+						}
+						// Close formatted writer
+						osw.close();
+					}
+					// Close output stream
+					os.close();
+				}
+			} catch (IOException e) {
+				// Unable to create file, likely because external storage is
+				// not currently mounted.
+				Log.e(TAG, "Error writing " + file, e);
+				e.printStackTrace();
+			}
+		}
+	}
+
+	/*
+	 * Method to remove the sensor list file
+	 */
+	private void deleteSensorListFile() {
+		// Get path for the file on external storage. If external
+		// storage is not currently mounted this will fail.
+		File file = new File(getExternalFilesDir(null),
+				getString(R.string.sensor_list_fname));
+		if (file != null) {
+			file.delete();
+		}
+	}
+
+	/*
+	 * Method to check if the sensor list file exists
+	 */
+	private boolean hasSensorListFile() {
+		boolean exists = false;
+		// Get path for the file on external storage. If external
+		// storage is not currently mounted this will fail.
+		File file = new File(getExternalFilesDir(null),
+				getString(R.string.sensor_list_fname));
+		if (file != null) {
+			exists = file.exists();
+		}
+		return exists;
+	}
+
+	/*
+	 * Retrieve a nicely formatted device name and version info
+	 */
+	private String getDeviceInfo() {
+		String deviceInfo;
+		String manufacturer = Build.MANUFACTURER;
+		String model = Build.MODEL;
+		if (model.startsWith(manufacturer)) {
+			deviceInfo = capitalize(model);
+		} else {
+			deviceInfo = capitalize(manufacturer) + " " + model;
+		}
+		return deviceInfo;
+	}
+
+	/*
+	 * Capitalize a string
+	 */
+	private String capitalize(String s) {
+		if (s == null || s.length() == 0) {
+			return "";
+		}
+		char first = s.charAt(0);
+		if (Character.isUpperCase(first)) {
+			return s;
+		} else {
+			return Character.toUpperCase(first) + s.substring(1);
+		}
 	}
 }

@@ -406,20 +406,29 @@
 
                 <ToggleButton
                     android:id="@+id/start_stop_events_button"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="left"
+                    android:layout_width="0dip"
+                    android:layout_height="fill_parent"
                     android:layout_weight="1"
+                    android:layout_gravity="end"
                     android:checked="true"
-                    android:textOn="@string/stop_events_tag"
-                    android:textOff="@string/start_events_tag" />
+                    android:textOff="@string/start_events_tag"
+                    android:textOn="@string/stop_events_tag" />
+
+                <ToggleButton
+                    android:id="@+id/start_stop_logging_button"
+                    android:layout_width="0dip"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="1"
+                    android:checked="false"
+                    android:textOff="@string/start_logging_tag"
+                    android:textOn="@string/stop_logging_tag" />
 
                 <Button
                     android:id="@+id/reset_events_button"
-                    android:layout_width="fill_parent"
+                    android:layout_width="0dip"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="right"
                     android:layout_weight="1"
+                    android:layout_gravity="end"
                     android:text="@string/reset_events_tag" />
             </LinearLayout>
         </LinearLayout>

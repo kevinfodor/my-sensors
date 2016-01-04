@@ -1,3 +1,7 @@
+Version 1.4 (Version Code=5)
+============================
+  * Supports Android SDK versions v4 through v22
+
 Version 1.3 (Version Code=4)
 ============================
   * Bug Fixed (#3) - Sensor List Memory Leak
