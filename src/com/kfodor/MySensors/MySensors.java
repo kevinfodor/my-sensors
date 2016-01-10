@@ -12,10 +12,12 @@ import java.util.Calendar;
 import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -40,6 +42,9 @@ public class MySensors extends FragmentActivity {
 	// an annotated list of all available sensors on the device.
 	private static ArrayList<SensorListEntry> sensorArray = new ArrayList<SensorListEntry>();
 
+	// Directory for application specific files
+	String directory = null;
+
 	/*
 	 * Called when the activity is first created. This is where you should do
 	 * all of your normal static set up: create views, bind data to lists, etc.
@@ -58,7 +63,7 @@ public class MySensors extends FragmentActivity {
 		setContentView(R.layout.main);
 
 		// Make sure we're running on Honeycomb or higher to use ActionBar APIs
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 			// For the main activity, make sure the app icon in the action bar
 			// does not behave as a button
 			ActionBar actionBar = getActionBar();
@@ -68,7 +73,11 @@ public class MySensors extends FragmentActivity {
 		// Load all available sensors
 		loadSensors();
 
-		// Write text file with sensor list if not present
+		// Determine where to store sensor static info and place
+		// log files.
+		directory = getStoragePath(this);
+
+		// Write text file with sensor list if not already present
 		if (hasSensorListFile() == false) {
 			createSensorListFile();
 		}
@@ -317,7 +326,7 @@ public class MySensors extends FragmentActivity {
 		case (R.id.delete_all_sensor_log_files): {
 
 			// Delete a log files
-			SensorLogger.deleteAllLogFiles(getExternalFilesDir(null).getPath(),
+			SensorLogger.deleteAllLogFiles(directory, "MySensors",
 					getString(R.string.sensor_log_file_ext));
 
 			// Construct notification next
@@ -326,6 +335,27 @@ public class MySensors extends FragmentActivity {
 			// Show notification
 			Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT)
 					.show();
+
+			return true;
+		}
+
+		// Show all Sensor Logs
+		case (R.id.show_log_files): {
+
+			// Create a uri for the storage directory
+			Uri uri = Uri.parse(directory);
+
+			// Create a new intent to launch the web search
+			Intent i = new Intent(Intent.ACTION_VIEW);
+			i.setDataAndType(uri, "resource/folder");
+
+			if (i.resolveActivityInfo(getPackageManager(), 0) != null) {
+				// startActivity(Intent.createChooser(i, "Open folder"));
+				startActivity(i);
+			} else {
+				// if you reach this place, it means there is no any file
+				// explorer app installed on your device
+			} // Start the web search
 
 			return true;
 		}
@@ -431,60 +461,52 @@ public class MySensors extends FragmentActivity {
 	 */
 	private void createSensorListFile() {
 
-		// Check if external storage is available
-		if (Environment.getExternalStorageState().equals(
-				Environment.MEDIA_MOUNTED)) {
-			// Create a path where we will place our private file on external
-			// storage.
-			File file = new File(getExternalFilesDir(null),
-					getString(R.string.sensor_list_fname));
+		// Create a path where we will place our sensor list file.
+		File file = new File(directory, getString(R.string.sensor_list_fname));
 
-			try {
-				file.setReadable(true, false);
-				OutputStream os = new FileOutputStream(file);
+		try {
+			OutputStream os = new FileOutputStream(file);
+			if (os != null) {
+				OutputStreamWriter osw = new OutputStreamWriter(os);
+
 				if (os != null) {
-					OutputStreamWriter osw = new OutputStreamWriter(os);
-
-					if (os != null) {
-						// Write app info
-						osw.write(getString(R.string.app_name) + " "
-								+ getString(R.string.app_version));
-						osw.write(System.getProperty("line.separator"));
-						// Write device model and date
-						SimpleDateFormat df = new SimpleDateFormat(
-								"EEE, d MMM yyyy HH:mm:ss Z");
-						String date = df.format(Calendar.getInstance()
-								.getTime());
-						osw.write("Device: " + getDeviceInfo());
-						osw.write(System.getProperty("line.separator"));
-						String version = System.getProperty("os.version") + "("
-								+ android.os.Build.VERSION.INCREMENTAL + ")";
-						osw.write("Version: " + version);
-						osw.write(System.getProperty("line.separator"));
-						osw.write("Date: " + date);
-						osw.write(System.getProperty("line.separator"));
-						// Write sensor list
-						for (SensorListEntry sensorItem : sensorArray) {
-							Sensor sensor = sensorItem.getSensor();
-							String text = String.format(
-									getString(R.string.sensor_log),
-									sensorItem.getIndex() + 1,
-									SensorInterface.getType(sensor.getType()),
-									sensor.hashCode(), sensor.toString());
-							osw.write(text);
-						}
-						// Close formatted writer
-						osw.close();
+					// Write app info
+					osw.write(getString(R.string.app_name) + " "
+							+ getString(R.string.app_version));
+					osw.write(System.getProperty("line.separator"));
+					// Write device model and date
+					osw.write("Device: " + getDeviceInfo());
+					osw.write(System.getProperty("line.separator"));
+					String version = System.getProperty("os.version") + "("
+							+ android.os.Build.VERSION.INCREMENTAL + ")";
+					osw.write("Version: " + version);
+					osw.write(System.getProperty("line.separator"));
+					java.text.DateFormat df = SimpleDateFormat
+							.getDateTimeInstance();
+					String date = df.format(Calendar.getInstance().getTime());
+					osw.write("Date: " + date);
+					osw.write(System.getProperty("line.separator"));
+					// Write sensor list
+					for (SensorListEntry sensorItem : sensorArray) {
+						Sensor sensor = sensorItem.getSensor();
+						String text = String.format(
+								getString(R.string.sensor_log),
+								sensorItem.getIndex() + 1,
+								SensorInterface.getType(sensor.getType()),
+								sensor.hashCode(), sensor.toString());
+						osw.write(text);
 					}
-					// Close output stream
-					os.close();
+					// Close formatted writer
+					osw.close();
 				}
-			} catch (IOException e) {
-				// Unable to create file, likely because external storage is
-				// not currently mounted.
-				Log.e(TAG, "Error writing " + file, e);
-				e.printStackTrace();
+				// Close output stream
+				os.close();
 			}
+		} catch (IOException e) {
+			// Unable to create file, likely because external storage is
+			// not currently mounted.
+			Log.e(TAG, "Error writing " + file, e);
+			e.printStackTrace();
 		}
 	}
 
@@ -494,8 +516,7 @@ public class MySensors extends FragmentActivity {
 	private void deleteSensorListFile() {
 		// Get path for the file on external storage. If external
 		// storage is not currently mounted this will fail.
-		File file = new File(getExternalFilesDir(null),
-				getString(R.string.sensor_list_fname));
+		File file = new File(directory, getString(R.string.sensor_list_fname));
 		if (file != null) {
 			file.delete();
 		}
@@ -508,8 +529,7 @@ public class MySensors extends FragmentActivity {
 		boolean exists = false;
 		// Get path for the file on external storage. If external
 		// storage is not currently mounted this will fail.
-		File file = new File(getExternalFilesDir(null),
-				getString(R.string.sensor_list_fname));
+		File file = new File(directory, getString(R.string.sensor_list_fname));
 		if (file != null) {
 			exists = file.exists();
 		}
@@ -545,4 +565,74 @@ public class MySensors extends FragmentActivity {
 			return Character.toUpperCase(first) + s.substring(1);
 		}
 	}
+
+	/*
+	 * A method to get the storage path where we want to store our files
+	 */
+	// @TargetApi(Build.VERSION_CODES.FROYO)
+	static public String getStoragePath(Context ctx) {
+		File f;
+		String path = null;
+
+		/*
+		 * Android devices support a type of storage called external storage
+		 * where apps can save files. It can be either removable like an SD card
+		 * or non-removable in which case it is internal. Files in this storage
+		 * are world readable which means other applications have access to them
+		 * and the user can transfer them to their computer by connecting with a
+		 * USB. Before writing to this volume we must check that it is available
+		 * as it can become unavailable if the SD card is removed or mounted to
+		 * the user’s computer.
+		 */
+		// Check if external storage is available
+		if (Environment.getExternalStorageState().equals(
+				Environment.MEDIA_MOUNTED)) {
+			// Make sure we're running on Froyo or higher to use this API
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
+				/*
+				 * This returns a top level public external storage directory
+				 * for shoving files of a particular type based on the argument
+				 * passed. e.g. /storage/emulated/0/DCIM
+				 */
+				/*
+				 * f = new File( Environment
+				 * .getExternalStoragePublicDirectory(Environment
+				 * .DIRECTORY_DCIM), "MySensors");
+				 */}
+			/*
+			 * Returns the absolute path to the directory on the primary
+			 * shared/external storage device where the application can place
+			 * persistent files it owns. e.g.
+			 * /storage/emulated/0/Android/data/com.kfodor.MySensors/files
+			 */
+			// f = getExternalFilesDir(null);
+			/*
+			 * This returns the primary (top-level or root) external storage
+			 * directory. e.g. /storage/emulated/0
+			 */
+			f = new File(Environment.getExternalStorageDirectory(), "MySensors");
+		} else {
+			/*
+			 * Returns the absolute path to the directory on the file system
+			 * where files created with openFileOutput(String, int) are stored.
+			 * e.g. /data/data/com.kfodor.MySensors/files
+			 */
+			f = ctx.getFilesDir();
+		}
+
+		// Create the directory
+		if (f.mkdir() || f.isDirectory()) {
+
+			// Retrieve path from the file
+			path = f.getPath();
+
+			// Write file path to the log
+			Log.d(TAG, "Application Storage Path: " + path);
+		} else {
+			Log.e(TAG, "Failed to create application path at " + f.getPath());
+		}
+
+		return path;
+	}
+
 }

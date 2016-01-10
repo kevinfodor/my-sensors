@@ -99,7 +99,7 @@ public class SensorView extends FragmentActivity implements
 		setContentView(R.layout.sensor_view);
 
 		// Make sure we're running on Honeycomb or higher to use ActionBar APIs
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 			// For the main activity, make sure the app icon in the action bar
 			// does not behave as a button
 			ActionBar actionBar = getActionBar();
@@ -152,7 +152,9 @@ public class SensorView extends FragmentActivity implements
 
 		// Create a file logger for this sensor
 		if (logger == null) {
-			logger = new SensorLogger(getExternalFilesDir(null),
+			String dir = MySensors.getStoragePath(this);
+			String prefix = String.format(Locale.US, "MySensors_%d", index + 1);
+			logger = new SensorLogger(dir, prefix,
 					getString(R.string.sensor_log_file_ext), si);
 		}
 
@@ -551,7 +553,8 @@ public class SensorView extends FragmentActivity implements
 		Sensor sensor = MySensors.findSensor(mgr, index);
 
 		String text = String.format(Locale.US,
-				"%s assigned, using sensor index: %d", sensor.getName(), index);
+				"%s assigned, using sensor index: %d", sensor.getName(),
+				index + 1);
 		Log.d(TAG, text);
 
 		// Now that we have the sensor, create a sensor interface object
@@ -559,7 +562,7 @@ public class SensorView extends FragmentActivity implements
 		si = new SensorInterface(sensor);
 
 		// Write some info to the log about this sensor
-		writeSensorInfo(index);
+		writeSensorInfo(index + 1);
 
 		return;
 	}

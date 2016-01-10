@@ -7,9 +7,9 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Calendar;
+import java.util.Locale;
 
 import android.hardware.SensorEvent;
-import android.os.Environment;
 import android.util.Log;
 
 public class SensorLogger {
@@ -36,7 +36,10 @@ public class SensorLogger {
 	private boolean wrote_header = false;
 
 	// Log file directory
-	private File directory = null;
+	private String directory = "";
+
+	// Log file prefix
+	private String prefix = "";
 
 	// Log file extension
 	private String ext = "";
@@ -44,28 +47,29 @@ public class SensorLogger {
 	/*
 	 * Constructor
 	 */
-	public SensorLogger(File dir, String ext, SensorInterface sensor) {
+	public SensorLogger(String dir, String prefix, String ext,
+			SensorInterface sensor) {
 		si = sensor; // Grab sensor interface
 		directory = dir;
+		this.prefix = prefix;
 		this.ext = ext;
 	}
 
 	@Override
 	protected void finalize() throws Throwable {
-		// TODO Auto-generated method stub
 		super.finalize();
 		closeSensorLogFile();
 	}
 
 	/*
-	 *  Create a unique file name based on date
+	 * Create a unique file name based on date
 	 */
 	private String fname() {
 		Calendar c = Calendar.getInstance();
 
 		// Create a unique filename
-		String fname = String.format(
-				"MySensors_%s_%04d%02d%02d_%02d%02d%02d.%s", si.getType()
+		String fname = String.format(Locale.US,
+				"%s_%s_%04d%02d%02d_%02d%02d%02d.%s", prefix, si.getType()
 						.replaceAll(" ", "_"), c.get(Calendar.YEAR), c
 						.get(Calendar.MONTH) + 1, c.get(Calendar.DAY_OF_MONTH),
 				c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), c
@@ -74,7 +78,7 @@ public class SensorLogger {
 	}
 
 	/*
-	 *  Log file write sensor event header
+	 * Log file write sensor event header
 	 */
 	private void hdr(int num_values) {
 		if (wrote_header == false) {
@@ -93,17 +97,15 @@ public class SensorLogger {
 				lfosw.write(ln);
 				wrote_header = true;
 			} catch (UnsupportedEncodingException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
 	}
 
 	/*
-	 *  Log file write sensor event method
+	 * Log file write sensor event method
 	 */
 	void write(SensorEvent event) {
 		if ((lfosw != null) && (enabled == true)) {
@@ -122,10 +124,8 @@ public class SensorLogger {
 				ln += System.getProperty("line.separator");
 				lfosw.write(ln);
 			} catch (UnsupportedEncodingException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -144,36 +144,29 @@ public class SensorLogger {
 	}
 
 	/*
-	 * This is a simple method which creates a sensor list file on the device
-	 * that contains a complete list of all sensors along with the device name
-	 * and date the list was created.
+	 * This method is used to create a sensor log file.
 	 */
 	private void createSensorLogFile() {
 
-		// Check if external storage is available
-		if (Environment.getExternalStorageState().equals(
-				Environment.MEDIA_MOUNTED)) {
-			// Create a path where we will place our private file on external
-			// storage.
-			lf = new File(directory, fname());
+		// Create a file where we will place our private
+		// file in storage.
+		lf = new File(directory, fname());
 
-			try {
-				lfos = new FileOutputStream(lf);
-				if (lfos != null) {
-					lfosw = new OutputStreamWriter(lfos);
-					if (lfosw == null) {
-						// Close output stream
-						lfos.close();
-						lfos = null;
-					}
+		try {
+			lfos = new FileOutputStream(lf);
+			if (lfos != null) {
+				lfosw = new OutputStreamWriter(lfos);
+				if (lfosw == null) {
+					// Close output stream
+					lfos.close();
+					lfos = null;
 				}
-			} catch (IOException e) {
-				// Unable to create file, likely because external storage is
-				// not currently mounted.
-				Log.e(TAG, "Error writing " + lf, e);
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
+		} catch (IOException e) {
+			// Unable to create file, likely because chosen storage
+			// path is not currently mounted.
+			Log.e(TAG, "Error writing " + lf, e);
+			e.printStackTrace();
 		}
 	}
 
@@ -209,19 +202,15 @@ public class SensorLogger {
 	/*
 	 * Public method to allow deleting all files with a particular extension
 	 */
-	public static void deleteAllLogFiles(String pathname, String ext) {
-		// Check if external storage is available
-		if (Environment.getExternalStorageState().equals(
-				Environment.MEDIA_MOUNTED)) {
-			// Create a path where we placed our private files on external
-			// storage.
-			File file = new File(pathname);
-			File log_files[] = file.listFiles();
-			for (int i = 0; i < log_files.length; i++) {
-				if (log_files[i].isFile()
-						&& log_files[i].getName().toLowerCase().endsWith(ext)) {
-					log_files[i].delete();
-				}
+	public static void deleteAllLogFiles(String pathname, String prefix,
+			String ext) {
+		// Access the path provided in which to delete log files from.
+		File file = new File(pathname);
+		File log_files[] = file.listFiles();
+		for (int i = 0; i < log_files.length; i++) {
+			if (log_files[i].isFile() && log_files[i].getName().endsWith(ext)
+					&& log_files[i].getName().startsWith(prefix)) {
+				log_files[i].delete();
 			}
 		}
 	}
