@@ -4,7 +4,7 @@ The latest release version of MySensors is on [Google Play](https://play.google.
 
 Downloads can be found here: [MySensors\_v1.4](https://drive.google.com/folderview?id=0B8_Aotc206N6em1uRzhyRVVncG8&usp=sharing)
 
-## Version 1.4 (Version Code=5) ##
+## Version 1.4-beta (Version Code=5) ##
 Download: [MySensors\_v1.4](https://drive.google.com/folderview?id=0B8_Aotc206N6em1uRzhyRVVncG8&usp=sharing)
 
   * Supports Android SDK v4 thru v22

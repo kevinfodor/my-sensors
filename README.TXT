@@ -1,4 +1,4 @@
-Version 1.4 (Version Code=5)
+Version 1.4-beta (Version Code=5)
 ============================
   * Supports Android SDK versions v4 through v22
 
