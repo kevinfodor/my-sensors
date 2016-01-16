@@ -1,0 +1,4 @@
+/bin/AndroidManifest.xml
+/bin/classes/.gitignore
+/gen/com/kfodor/MySensors/BuildConfig.java
+/gen/com/kfodor/MySensors/R.java
