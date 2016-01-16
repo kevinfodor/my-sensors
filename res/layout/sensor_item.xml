@@ -1,36 +1,21 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
+    android:layout_width="match_parent"
     android:layout_height="?android:attr/listPreferredItemHeight"
-    android:padding="6dip" >
+    android:padding="@dimen/list_padding" >
 
     <ImageView
         android:id="@+id/sensor_icon"
         android:layout_width="wrap_content"
-        android:layout_height="fill_parent"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentTop="true"
         android:contentDescription="@string/empty"
         android:src="@drawable/unknown_sensor" />
 
     <TextView
-        android:id="@+id/sensor_vendor"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_toEndOf="@+id/sensor_icon"
-        android:layout_toRightOf="@id/sensor_icon"
-        android:ellipsize="marquee"
-        android:singleLine="true"
-        android:text="@string/sensor_vendor_tag"
-        android:textColor="@color/sensor_vendor" />
-
-    <TextView
         android:id="@+id/sensor_name"
-        android:layout_width="fill_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@id/sensor_vendor"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
@@ -39,7 +24,28 @@
         android:layout_toRightOf="@id/sensor_icon"
         android:gravity="center_vertical"
         android:text="@string/sensor_name_tag"
-        android:textColor="@color/sensor_name"
-        android:textSize="24sp" />
+        android:ellipsize="marquee"
+        android:lines="1"
+        android:maxLines="1"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="@color/sensor_name" />
+
+    <TextView
+        android:id="@+id/sensor_vendor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_toEndOf="@+id/sensor_icon"
+        android:layout_toRightOf="@id/sensor_icon"
+        android:ellipsize="marquee"
+        android:lines="1"
+        android:maxLines="1"
+        android:paddingTop="@dimen/list_padding"
+        android:singleLine="true"
+        android:text="@string/sensor_vendor_tag"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/sensor_vendor" />
 
 </RelativeLayout>

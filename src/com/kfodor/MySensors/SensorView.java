@@ -2,7 +2,6 @@ package com.kfodor.MySensors;
 
 import java.util.ArrayList;
 import java.util.Locale;
-
 import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.app.Dialog;
@@ -23,6 +22,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -160,6 +160,12 @@ public class SensorView extends FragmentActivity implements
 
 		// Apply settings
 		applySettings();
+	}
+
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		onCreate(savedInstanceState);
+		return container;
 	}
 
 	/*

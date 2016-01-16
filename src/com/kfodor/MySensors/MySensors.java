@@ -8,7 +8,6 @@ import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-
 import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.app.Dialog;
@@ -22,10 +21,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -81,6 +82,12 @@ public class MySensors extends FragmentActivity {
 		if (hasSensorListFile() == false) {
 			createSensorListFile();
 		}
+	}
+
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		onCreate(savedInstanceState);
+		return container;
 	}
 
 	/*
@@ -569,7 +576,6 @@ public class MySensors extends FragmentActivity {
 	/*
 	 * A method to get the storage path where we want to store our files
 	 */
-	// @TargetApi(Build.VERSION_CODES.FROYO)
 	static public String getStoragePath(Context ctx) {
 		File f;
 		String path = null;
