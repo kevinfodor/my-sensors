@@ -4,7 +4,7 @@
     <string name="empty">No sensors!</string>
     <string name="app_name">My Sensors</string>
     <string name="app_author">Kevin Fodor</string>
-    <string name="app_version">v1.4-beta</string>
+    <string name="app_version">v1.4-beta2</string>
     <string name="app_about_text">This application is a very simple utility
     which allows you to explore each sensor available on an Android device.
     This is mainly intended to be an instructional and experimental application

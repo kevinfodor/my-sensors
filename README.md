@@ -4,10 +4,14 @@ The latest release version of MySensors is on [Google Play](https://play.google.
 
 Downloads can be found here: [MySensors\_v1.4](https://drive.google.com/folderview?id=0B8_Aotc206N6em1uRzhyRVVncG8&usp=sharing)
 
-## Version 1.4-beta (Version Code=5) ##
-Download: [MySensors\_v1.4](https://drive.google.com/folderview?id=0B8_Aotc206N6em1uRzhyRVVncG8&usp=sharing)
+## Version 1.4-beta2 (Version Code=6) ##
+Download: [MySensors\_v1.4beta2](https://drive.google.com/folderview?id=0B8_Aotc206N6bjZCaDVZZlhCeGM&usp=sharing)
 
-  * Supports Android SDK v4 thru v22
+  * Supports Android SDK versions v4 through v23
+  * Added sensor view logging (#9) to a file which can be retrieved by a host PC through the device USB drive.
+  * Added the ability to log all found sensors to a file (MySensors.txt).
+  * Added the ability to view and delete all collected sensor view logs.
+  * Bug Fixed (#10) - Some screens using the sensor list where text as too large for the item.
   
 ## Version 1.3 (Version Code=4) ##
 Download: [MySensors\_v1.3](https://drive.google.com/folderview?id=0B8_Aotc206N6em1uRzhyRVVncG8&usp=sharing)
