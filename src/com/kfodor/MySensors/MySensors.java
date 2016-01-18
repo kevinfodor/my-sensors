@@ -2,16 +2,18 @@ package com.kfodor.MySensors;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+
 import android.annotation.TargetApi;
 import android.app.ActionBar;
+import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.hardware.Sensor;
@@ -19,7 +21,8 @@ import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -43,8 +46,8 @@ public class MySensors extends FragmentActivity {
 	// an annotated list of all available sensors on the device.
 	private static ArrayList<SensorListEntry> sensorArray = new ArrayList<SensorListEntry>();
 
-	// Directory for application specific files
-	String directory = null;
+	// A place to store application files (sensor list and logs)
+	private String app_directory = null;
 
 	/*
 	 * Called when the activity is first created. This is where you should do
@@ -74,12 +77,14 @@ public class MySensors extends FragmentActivity {
 		// Load all available sensors
 		loadSensors();
 
-		// Determine where to store sensor static info and place
-		// log files.
-		directory = getStoragePath(this);
+		// Initialize directory to use
+		app_directory = Utilities.getStoragePath(this);
 
 		// Write text file with sensor list if not already present
-		if (hasSensorListFile() == false) {
+		if (Utilities.isFileExists(app_directory,
+				getString(R.string.sensor_list_fname)) == false) {
+
+			// Create the list file
 			createSensorListFile();
 		}
 	}
@@ -314,17 +319,11 @@ public class MySensors extends FragmentActivity {
 		// Rewrite Sensor List
 		case (R.id.rewrite): {
 			// Delete the existing file (if any)
-			deleteSensorListFile();
+			Utilities.deleteFile(app_directory,
+					getString(R.string.sensor_list_fname));
 
 			// Create a new file
 			createSensorListFile();
-
-			// Construct notification next
-			String text = String
-					.format(getString(R.string.rewrite_sensor_list_notification_tag));
-			// Show notification
-			Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT)
-					.show();
 
 			return true;
 		}
@@ -332,9 +331,48 @@ public class MySensors extends FragmentActivity {
 		// Delete all Sensor Logs
 		case (R.id.delete_all_sensor_log_files): {
 
-			// Delete a log files
-			SensorLogger.deleteAllLogFiles(directory, "MySensors",
-					getString(R.string.sensor_log_file_ext));
+			File f = null;
+			File[] paths;
+
+			// Delete all log files
+			try {
+				f = new File(app_directory);
+
+				// create new filename filter
+				FilenameFilter fileNameFilter = new FilenameFilter() {
+
+					@Override
+					public boolean accept(File dir, String name) {
+						if (name.lastIndexOf('.') > 0) {
+							// get last index for '.' char
+							int lastIndex = name.lastIndexOf('.');
+
+							// get extension
+							String str = name.substring(lastIndex);
+
+							// match path name extension
+							if (str.equals(getString(R.string.sensor_log_file_ext))) {
+								return true;
+							}
+						}
+						return false;
+					}
+				};
+
+				// returns pathnames for files and directory
+				paths = f.listFiles(fileNameFilter);
+
+				// for each pathname in pathname array
+				for (File path : paths) {
+					// Delete the file
+					path.delete();
+					// Update media scanner
+					Utilities.scanMedia(this, path);
+				}
+			} catch (Exception e) {
+				// if any error occurs
+				e.printStackTrace();
+			}
 
 			// Construct notification next
 			String text = String
@@ -350,19 +388,54 @@ public class MySensors extends FragmentActivity {
 		case (R.id.show_log_files): {
 
 			// Create a uri for the storage directory
-			Uri uri = Uri.parse(directory);
+			Uri uri = Uri.parse(app_directory);
 
-			// Create a new intent to launch the web search
+			// Create a new intent to launch the folder browser
 			Intent i = new Intent(Intent.ACTION_VIEW);
 			i.setDataAndType(uri, "resource/folder");
 
 			if (i.resolveActivityInfo(getPackageManager(), 0) != null) {
-				// startActivity(Intent.createChooser(i, "Open folder"));
 				startActivity(i);
 			} else {
 				// if you reach this place, it means there is no any file
 				// explorer app installed on your device
-			} // Start the web search
+
+				String msg = new String(String.format(
+						getString(R.string.no_folder_browser_tag),
+						getString(R.string.es_file_explorer_url),
+						getString(R.string.astro_explorer_url)));
+
+				AlertDialog.Builder builder = new AlertDialog.Builder(this);
+				builder.setMessage(Html.fromHtml(msg)).setCancelable(false)
+						.setPositiveButton(android.R.string.ok, null)
+						.setIcon(android.R.drawable.ic_dialog_info);
+				AlertDialog alert = builder.create();
+
+				alert.show();
+
+				((TextView) alert.findViewById(android.R.id.message))
+						.setMovementMethod(LinkMovementMethod.getInstance());
+
+			}
+
+			return true;
+		}
+
+		// Rescan sensor list and all logs
+		case (R.id.rescan): {
+
+			// Force a media rescan to make any new files visible as media
+			Utilities.scanMedia(this);
+
+			/*
+			 * MediaScannerConnection.scanFile(getApplicationContext(), new
+			 * String[] { app_directory }, null, null);
+			 */
+
+			// Show notification
+			String text = String.format(getString(R.string.rescan_tag));
+			Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT)
+					.show();
 
 			return true;
 		}
@@ -469,7 +542,8 @@ public class MySensors extends FragmentActivity {
 	private void createSensorListFile() {
 
 		// Create a path where we will place our sensor list file.
-		File file = new File(directory, getString(R.string.sensor_list_fname));
+		File file = new File(app_directory,
+				getString(R.string.sensor_list_fname));
 
 		try {
 			OutputStream os = new FileOutputStream(file);
@@ -482,7 +556,7 @@ public class MySensors extends FragmentActivity {
 							+ getString(R.string.app_version));
 					osw.write(System.getProperty("line.separator"));
 					// Write device model and date
-					osw.write("Device: " + getDeviceInfo());
+					osw.write("Device: " + Utilities.getDeviceInfo());
 					osw.write(System.getProperty("line.separator"));
 					String version = System.getProperty("os.version") + "("
 							+ android.os.Build.VERSION.INCREMENTAL + ")";
@@ -509,136 +583,24 @@ public class MySensors extends FragmentActivity {
 				// Close output stream
 				os.close();
 			}
+
+			// Add to media connection (scan)
+			Utilities.scanMedia(this, file);
+
+			// Construct notification next
+			String text = String.format(
+					getString(R.string.sensor_list_created),
+					file.getAbsolutePath());
+			// Show notification
+			Toast.makeText(getApplicationContext(), text, Toast.LENGTH_LONG)
+					.show();
+
 		} catch (IOException e) {
 			// Unable to create file, likely because external storage is
 			// not currently mounted.
 			Log.e(TAG, "Error writing " + file, e);
 			e.printStackTrace();
 		}
-	}
-
-	/*
-	 * Method to remove the sensor list file
-	 */
-	private void deleteSensorListFile() {
-		// Get path for the file on external storage. If external
-		// storage is not currently mounted this will fail.
-		File file = new File(directory, getString(R.string.sensor_list_fname));
-		if (file != null) {
-			file.delete();
-		}
-	}
-
-	/*
-	 * Method to check if the sensor list file exists
-	 */
-	private boolean hasSensorListFile() {
-		boolean exists = false;
-		// Get path for the file on external storage. If external
-		// storage is not currently mounted this will fail.
-		File file = new File(directory, getString(R.string.sensor_list_fname));
-		if (file != null) {
-			exists = file.exists();
-		}
-		return exists;
-	}
-
-	/*
-	 * Retrieve a nicely formatted device name and version info
-	 */
-	private String getDeviceInfo() {
-		String deviceInfo;
-		String manufacturer = Build.MANUFACTURER;
-		String model = Build.MODEL;
-		if (model.startsWith(manufacturer)) {
-			deviceInfo = capitalize(model);
-		} else {
-			deviceInfo = capitalize(manufacturer) + " " + model;
-		}
-		return deviceInfo;
-	}
-
-	/*
-	 * Capitalize a string
-	 */
-	private String capitalize(String s) {
-		if (s == null || s.length() == 0) {
-			return "";
-		}
-		char first = s.charAt(0);
-		if (Character.isUpperCase(first)) {
-			return s;
-		} else {
-			return Character.toUpperCase(first) + s.substring(1);
-		}
-	}
-
-	/*
-	 * A method to get the storage path where we want to store our files
-	 */
-	static public String getStoragePath(Context ctx) {
-		File f;
-		String path = null;
-
-		/*
-		 * Android devices support a type of storage called external storage
-		 * where apps can save files. It can be either removable like an SD card
-		 * or non-removable in which case it is internal. Files in this storage
-		 * are world readable which means other applications have access to them
-		 * and the user can transfer them to their computer by connecting with a
-		 * USB. Before writing to this volume we must check that it is available
-		 * as it can become unavailable if the SD card is removed or mounted to
-		 * the user’s computer.
-		 */
-		// Check if external storage is available
-		if (Environment.getExternalStorageState().equals(
-				Environment.MEDIA_MOUNTED)) {
-			// Make sure we're running on Froyo or higher to use this API
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
-				/*
-				 * This returns a top level public external storage directory
-				 * for shoving files of a particular type based on the argument
-				 * passed. e.g. /storage/emulated/0/DCIM
-				 */
-				/*
-				 * f = new File( Environment
-				 * .getExternalStoragePublicDirectory(Environment
-				 * .DIRECTORY_DCIM), "MySensors");
-				 */}
-			/*
-			 * Returns the absolute path to the directory on the primary
-			 * shared/external storage device where the application can place
-			 * persistent files it owns. e.g.
-			 * /storage/emulated/0/Android/data/com.kfodor.MySensors/files
-			 */
-			// f = getExternalFilesDir(null);
-			/*
-			 * This returns the primary (top-level or root) external storage
-			 * directory. e.g. /storage/emulated/0
-			 */
-			f = new File(Environment.getExternalStorageDirectory(), "MySensors");
-		} else {
-			/*
-			 * Returns the absolute path to the directory on the file system
-			 * where files created with openFileOutput(String, int) are stored.
-			 * e.g. /data/data/com.kfodor.MySensors/files
-			 */
-			f = ctx.getFilesDir();
-		}
-
-		// Create the directory
-		if (f.mkdir() || f.isDirectory()) {
-
-			// Retrieve path from the file
-			path = f.getPath();
-
-			// Write file path to the log
-			Log.d(TAG, "Application Storage Path: " + path);
-		} else {
-			Log.e(TAG, "Failed to create application path at " + f.getPath());
-		}
-
-		return path;
 	}
 
 }

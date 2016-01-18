@@ -2,6 +2,7 @@ package com.kfodor.MySensors;
 
 import java.util.ArrayList;
 import java.util.Locale;
+
 import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.app.Dialog;
@@ -81,6 +82,9 @@ public class SensorView extends FragmentActivity implements
 	// Sensor Logger object
 	private SensorLogger logger = null;
 
+	// Application storage directory
+	private String app_directory = null;
+
 	/*
 	 * Called when the activity is first created. This is where you should do
 	 * all of your normal static set up: create views, bind data to lists, etc.
@@ -150,11 +154,14 @@ public class SensorView extends FragmentActivity implements
 		// Prevent rotation of the screen, due to sensor changes
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
 
+		// Initialize directory to use
+		app_directory = Utilities.getStoragePath(this);
+
 		// Create a file logger for this sensor
 		if (logger == null) {
-			String dir = MySensors.getStoragePath(this);
-			String prefix = String.format(Locale.US, "MySensors_%d", index + 1);
-			logger = new SensorLogger(dir, prefix,
+			String prefix = String.format(Locale.US, "%s_%d",
+					getString(R.string.log_file_prefix), index + 1);
+			logger = new SensorLogger(app_directory, prefix,
 					getString(R.string.sensor_log_file_ext), si);
 		}
 
@@ -514,7 +521,7 @@ public class SensorView extends FragmentActivity implements
 			}
 
 			// Log information about this sensor
-			logger.write(event);
+			logger.writeEvent(event);
 		}
 	}
 
@@ -866,5 +873,6 @@ public class SensorView extends FragmentActivity implements
 			// Stop logging
 			logger.enable(false);
 		}
+		Utilities.scanMedia(this, logger.getFile());
 	}
 }

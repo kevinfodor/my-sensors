@@ -36,7 +36,7 @@ public class SensorLogger {
 	private boolean wrote_header = false;
 
 	// Log file directory
-	private String directory = "";
+	private String dir = "";
 
 	// Log file prefix
 	private String prefix = "";
@@ -50,7 +50,7 @@ public class SensorLogger {
 	public SensorLogger(String dir, String prefix, String ext,
 			SensorInterface sensor) {
 		si = sensor; // Grab sensor interface
-		directory = dir;
+		this.dir = dir;
 		this.prefix = prefix;
 		this.ext = ext;
 	}
@@ -58,7 +58,15 @@ public class SensorLogger {
 	@Override
 	protected void finalize() throws Throwable {
 		super.finalize();
-		closeSensorLogFile();
+		// Stop logging (if we are logging)
+		enable(false);
+	}
+
+	/*
+	 * Return the current log file handle
+	 */
+	public File getFile() {
+		return lf;
 	}
 
 	/*
@@ -69,7 +77,7 @@ public class SensorLogger {
 
 		// Create a unique filename
 		String fname = String.format(Locale.US,
-				"%s_%s_%04d%02d%02d_%02d%02d%02d.%s", prefix, si.getType()
+				"%s_%s_%04d%02d%02d_%02d%02d%02d%s", prefix, si.getType()
 						.replaceAll(" ", "_"), c.get(Calendar.YEAR), c
 						.get(Calendar.MONTH) + 1, c.get(Calendar.DAY_OF_MONTH),
 				c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), c
@@ -80,7 +88,7 @@ public class SensorLogger {
 	/*
 	 * Log file write sensor event header
 	 */
-	private void hdr(int num_values) {
+	private void writeHdr(int num_values) {
 		if (wrote_header == false) {
 			try {
 				String ln = "";
@@ -107,9 +115,9 @@ public class SensorLogger {
 	/*
 	 * Log file write sensor event method
 	 */
-	void write(SensorEvent event) {
+	void writeEvent(SensorEvent event) {
 		if ((lfosw != null) && (enabled == true)) {
-			hdr(event.values.length);
+			writeHdr(event.values.length);
 			try {
 				String ln = "";
 				ln += event.timestamp + ",";
@@ -136,7 +144,7 @@ public class SensorLogger {
 	 */
 	void enable(boolean ctl) {
 		if ((enabled == false) && (ctl == true)) {
-			createSensorLogFile();
+			openSensorLogFile();
 		} else if ((enabled == true) && (ctl == false)) {
 			closeSensorLogFile();
 		}
@@ -144,13 +152,13 @@ public class SensorLogger {
 	}
 
 	/*
-	 * This method is used to create a sensor log file.
+	 * This method is used to open a sensor log file.
 	 */
-	private void createSensorLogFile() {
+	private void openSensorLogFile() {
 
 		// Create a file where we will place our private
 		// file in storage.
-		lf = new File(directory, fname());
+		lf = new File(dir, fname());
 
 		try {
 			lfos = new FileOutputStream(lf);
@@ -197,21 +205,5 @@ public class SensorLogger {
 		}
 
 		wrote_header = false;
-	}
-
-	/*
-	 * Public method to allow deleting all files with a particular extension
-	 */
-	public static void deleteAllLogFiles(String pathname, String prefix,
-			String ext) {
-		// Access the path provided in which to delete log files from.
-		File file = new File(pathname);
-		File log_files[] = file.listFiles();
-		for (int i = 0; i < log_files.length; i++) {
-			if (log_files[i].isFile() && log_files[i].getName().endsWith(ext)
-					&& log_files[i].getName().startsWith(prefix)) {
-				log_files[i].delete();
-			}
-		}
 	}
 }

@@ -61,10 +61,15 @@
     <string name="stop_events_tag">Stop Events</string>
     <string name="sensor_list_fname">MySensors.txt</string>
     <string name="rewrite_sensor_list_tag">Rewrite Sensor List</string>
-    <string name="rewrite_sensor_list_notification_tag">Rewrote Sensor List File</string>
-    <string name="sensor_log_file_ext">csv</string>
+    <string name="sensor_log_file_ext">.csv</string>
     <string name="start_logging_tag">Start Logging</string>
     <string name="stop_logging_tag">Stop Logging</string>
     <string name="show_all_log_files_tag">Show All Log Files</string>
+    <string name="rescan_tag">Rescan Files</string>
+    <string name="sensor_list_created">Sensor list %1$s created</string>
+    <string name="no_folder_browser_tag">"You do not have a method installed to browse folders on your device. Install an application such as %1$s or %2$s to browse folders on your device."</string>
+    <string name="es_file_explorer_url"><![CDATA[<a href="https://play.google.com/store/apps/details?id=com.estrongs.android.pop">ES File Explorer</a>]]></string>
+    <string name="astro_explorer_url"><![CDATA[<a href="https://play.google.com/store/apps/details?id=com.metago.astro">ASTRO File Manager</a>]]></string>
+    <string name="log_file_prefix">MySensors</string>
     
 </resources>
