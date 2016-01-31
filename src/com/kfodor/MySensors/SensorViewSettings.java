@@ -30,8 +30,8 @@ public class SensorViewSettings {
 	private static final String SENSOR_ORIENTATION_TAG = "orientation";
 
 	// Logging of sensor data
-	private boolean log_data = false;
-	private static final String SENSOR_LOG_DATA_TAG = "logging";
+	private boolean log_to_adb = false;
+	private static final String SENSOR_LOG_TO_ADB_TAG = "logging";
 
 	// Create with explicit values
 	SensorViewSettings(int rate, boolean show_all_values, int orientation) {
@@ -50,14 +50,14 @@ public class SensorViewSettings {
 				SENSOR_SHOW_ALL_VALUES_TAG, false);
 		this.orientation = preferences.getInt(SENSOR_ORIENTATION_TAG,
 				ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-		this.log_data = preferences.getBoolean(SENSOR_LOG_DATA_TAG, false);
+		this.log_to_adb = preferences.getBoolean(SENSOR_LOG_TO_ADB_TAG, false);
 
 		// Write some info to the log about this restore
 		String text = String
 				.format(Locale.US,
 						"Restored settings; rate=%s, show_all_values=%B, orientation=%d, log_data=%B",
 						SensorInterface.delayToString(rate), show_all_values,
-						orientation, log_data);
+						orientation, log_to_adb);
 		Log.d(TAG, text);
 	}
 
@@ -67,7 +67,7 @@ public class SensorViewSettings {
 		rate = SensorManager.SENSOR_DELAY_NORMAL;
 		show_all_values = false;
 		orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-		log_data = false;
+		log_to_adb = false;
 	}
 
 	public int getRate() {
@@ -82,8 +82,8 @@ public class SensorViewSettings {
 		return orientation;
 	}
 
-	public boolean getLogData() {
-		return log_data;
+	public boolean isADBLogging() {
+		return log_to_adb;
 	}
 
 	public void setRate(int rate) {
@@ -113,12 +113,12 @@ public class SensorViewSettings {
 		Log.d(TAG, text);
 	}
 
-	public void setLogData(boolean log_data) {
-		this.log_data = log_data;
+	public void setLogToADB(boolean log_to_adb) {
+		this.log_to_adb = log_to_adb;
 
 		// Write some info to the log about this change
 		String text = String.format(Locale.US,
-				"Setting 'log_data' changed to %B", this.log_data);
+				"Setting 'log_to_adb' changed to %B", this.log_to_adb);
 		Log.d(TAG, text);
 	}
 
@@ -131,14 +131,14 @@ public class SensorViewSettings {
 		editor.putInt(SENSOR_RATE_TAG, rate);
 		editor.putBoolean(SENSOR_SHOW_ALL_VALUES_TAG, show_all_values);
 		editor.putInt(SENSOR_ORIENTATION_TAG, orientation);
-		editor.putBoolean(SENSOR_LOG_DATA_TAG, log_data);
+		editor.putBoolean(SENSOR_LOG_TO_ADB_TAG, log_to_adb);
 
 		// Write some info to the log about this save
 		String text = String
 				.format(Locale.US,
 						"Saved settings; rate=%s, show_all_values=%B, orientation=%d, log_data=%B",
 						SensorInterface.delayToString(rate), show_all_values,
-						orientation, log_data);
+						orientation, log_to_adb);
 		Log.d(TAG, text);
 
 		// Commit to storage

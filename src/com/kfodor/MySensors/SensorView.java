@@ -237,6 +237,15 @@ public class SensorView extends FragmentActivity implements
 		super.onStop();
 		Log.d(TAG, "onStop\n");
 
+		// Check if logging button state is active and take action
+		if (start_stop_logging_button.isChecked() == true) {
+			// Stop logging
+			logger.enable(false);
+
+			// Add to media connection (scan)
+			Utilities.scanMedia(this, logger.getFile());
+		}
+
 		// Save settings
 		preferences = getSharedPreferences(settings_name, MODE_PRIVATE);
 		settings.save(preferences);
@@ -332,7 +341,7 @@ public class SensorView extends FragmentActivity implements
 		checked = settings.getShowAllValues();
 		menu.findItem(R.id.show_all_values).setChecked(checked);
 
-		checked = settings.getLogData();
+		checked = settings.isADBLogging();
 		menu.findItem(R.id.log_data).setChecked(checked);
 
 		return true;
@@ -397,11 +406,11 @@ public class SensorView extends FragmentActivity implements
 		case (R.id.log_data): {
 
 			// Toggle current 'log' state
-			Boolean log_data = settings.getLogData();
+			Boolean log_data = settings.isADBLogging();
 			log_data = !log_data;
 
 			// Record new setting
-			settings.setLogData(log_data);
+			settings.setLogToADB(log_data);
 
 			// Handle check/unchecked setting.
 			item.setChecked(log_data);
@@ -831,7 +840,7 @@ public class SensorView extends FragmentActivity implements
 	// Simple write member function to dump sensor data
 	private void writeSensorData(int i, SensorEvent event) {
 		// Check if logging has been enabled
-		if (settings.getLogData() == true) {
+		if (settings.isADBLogging() == true) {
 			// Write some info to the log about this sensor
 			String text = String.format(getString(R.string.sensor_data_format),
 					i);
@@ -872,7 +881,9 @@ public class SensorView extends FragmentActivity implements
 		} else {
 			// Stop logging
 			logger.enable(false);
+
+			// Add to media connection (scan)
+			Utilities.scanMedia(this, logger.getFile());
 		}
-		Utilities.scanMedia(this, logger.getFile());
 	}
 }
